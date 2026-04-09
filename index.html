@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ME4PH Lab | Automated Scheduling Protocol</title>
+    <meta name="description" content="State-of-the-art laboratory equipment scheduling and protocol management system for ME4PH Lab.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">M</span>
+                    <span class="logo-text">ME4PH <span class="accent">Lab</span></span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" id="nav-dashboard">
+                        <span class="icon">📅</span>
+                        <span class="label">Schedule</span>
+                    </li>
+                    <li class="nav-item" id="nav-media">
+                        <span class="icon">🧫</span>
+                        <span class="label">Media</span>
+                    </li>
+                    <li class="nav-item" id="nav-reagents">
+                        <span class="icon">🧪</span>
+                        <span class="label">Reagents</span>
+                    </li>
+                    <li class="nav-item" id="nav-maintenance">
+                        <span class="icon">🛠️</span>
+                        <span class="label">Under Maintenance</span>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="pulse-dot green" id="status-pulse"></span>
+                    <span class="status-text" id="status-text">Cloud Sync: Active</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header glass">
+                <div class="header-left">
+                    <h1 id="page-title">Laboratory Timeline</h1>
+                    <p class="subtitle" id="current-date">Thursday, April 9, 2026</p>
+                </div>
+                <div class="header-right">
+                    <div class="time-container">
+                        <div class="time-display" id="digital-clock">07:03:15 AM</div>
+                        <button class="header-theme-toggle" id="header-theme-toggle" title="Toggle Laboratory Theme">
+                            <span class="icon">🌙</span>
+                            <span class="label">Midnight Mode</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <section class="dashboard-scrollable">
+                <div id="schedule-view">
+                    <!-- Lab Protocol Alert -->
+                    <div class="protocol-alert glass">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-content">
+                            <h3>Active Protocol: Standard Hours (08:00 - 17:00)</h3>
+                            <p>Laboratory usage after <strong>17:00 PHT</strong> requires a supervisor present and a valid Overtime (OT) Permit.</p>
+                        </div>
+                    </div>
+
+                    <div class="schedule-layout">
+                        <!-- Calendar Container -->
+                        <div class="calendar-wrapper glass">
+                            <div class="calendar-nav">
+                                <button class="nav-btn" id="prev-month">❮</button>
+                                <h2 id="month-year-display">April 2026</h2>
+                                <button class="nav-btn" id="next-month">❯</button>
+                            </div>
+                            
+                            <div class="calendar-header">
+                                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                            </div>
+                            
+                            <div class="calendar-grid" id="calendar-grid">
+                                <!-- JS will populate day-cells here -->
+                            </div>
+                        </div>
+
+                        <!-- Agenda Sidebar -->
+                        <aside class="agenda-sidebar glass">
+                            <div class="agenda-header">
+                                <h3>Today's Agenda</h3>
+                                <span class="agenda-date" id="agenda-date-label">April 9, 2026</span>
+                            </div>
+                            <div class="agenda-list" id="agenda-list">
+                                <!-- JS will populate agenda items here -->
+                                <div class="empty-agenda">No reservations for today.</div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+
+                <div id="media-view" class="hidden">
+                    <div class="view-header">
+                        <div class="header-content">
+                            <h2>Media Inventory</h2>
+                            <p class="subtitle">Track and manage cell culture media and supplements.</p>
+                        </div>
+                        <button class="btn btn-primary" id="add-media-btn">+ Log New Media</button>
+                    </div>
+                    <div class="maintenance-grid" id="media-grid"></div>
+                </div>
+
+                <div id="reagents-view" class="hidden">
+                    <div class="view-header">
+                        <div class="header-content">
+                            <h2>Chemicals & Reagents</h2>
+                            <p class="subtitle">Stock levels of buffers, chemicals, and laboratory reagents.</p>
+                        </div>
+                        <button class="btn btn-primary" id="add-reagent-btn">+ Log New Reagent</button>
+                    </div>
+                    <div class="maintenance-grid" id="reagents-grid"></div>
+                </div>
+
+                <div id="maintenance-view" class="hidden">
+                    <div class="view-header">
+                        <div class="header-content">
+                            <h2>Infrastructure Status</h2>
+                            <p class="subtitle">Real-time status of ME4PH Laboratory hardware and systems.</p>
+                        </div>
+                        <button class="btn btn-primary" id="report-issue-btn">+ Report Issue</button>
+                    </div>
+                    
+                    <div class="maintenance-grid" id="maintenance-grid">
+                        <!-- JS will populate status-cards here -->
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <!-- Booking Modal (Updated for Flexible Resources) -->
+    <div id="booking-modal" class="modal-overlay">
+        <div class="modal-content glass">
+            <header class="modal-header">
+                <h2>Secure Lab Resource</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </header>
+            <form id="booking-form">
+                <div class="form-group">
+                    <label for="date-display">Selected Date</label>
+                    <input type="text" id="date-display" readonly class="readonly-input">
+                </div>
+                <div class="form-group">
+                    <label for="student-name">Full Name</label>
+                    <input type="text" id="student-name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="resource-input">Equipment / Bench Space</label>
+                    <input type="text" id="resource-input" placeholder="e.g. PCR Machine, Bench 4, Flow Cytometer" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start-time">Start Time</label>
+                        <input type="time" id="start-time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end-time">End Time</label>
+                        <input type="time" id="end-time" required>
+                    </div>
+                </div>
+                <!-- OT Protocol Reminder (Internal Alert) -->
+                <div id="ot-warning" class="ot-warning hidden">
+                    <p>⚠️ <strong>OT Protocol Required</strong>: Your requested time extends beyond standard hours. Please ensures a supervisor is present and you possess a valid OT permit.</p>
+                </div>
+                <div class="form-group">
+                    <label for="experiment-note">Purpose of Use</label>
+                    <textarea id="experiment-note" placeholder="Briefly describe the experiment protocol..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-booking">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="confirm-booking">Confirm Reservation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Media Logging Modal -->
+    <div id="media-modal" class="modal-overlay">
+        <div class="modal-content glass">
+            <header class="modal-header">
+                <h2>Log Laboratory Media</h2>
+                <button class="close-btn" id="close-media-modal">&times;</button>
+            </header>
+            <form id="media-form">
+                <div class="form-group">
+                    <label for="media-name">Media Name / Type</label>
+                    <input type="text" id="media-name" placeholder="e.g. DMEM High Glucose" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="media-icon">Icon</label>
+                        <select id="media-icon">
+                            <option value="🧫">🧫 Cell Culture</option>
+                            <option value="🧪">🧪 Tube / Sample</option>
+                            <option value="🧴">🧴 Bottle</option>
+                            <option value="❄️">❄️ Cold Storage</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="media-status">Supply Status</label>
+                        <select id="media-status">
+                            <option value="In Stock">In Stock</option>
+                            <option value="Low Stock">Low Stock</option>
+                            <option value="Almost Consumed">Almost Consumed</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="media-supplier">Supplier</label>
+                    <input type="text" id="media-supplier" placeholder="e.g. Thermo Fisher, Gibco" required>
+                </div>
+                <div class="form-group">
+                    <label for="media-notes">Batch / Expiry / Notes</label>
+                    <textarea id="media-notes" placeholder="Batch number or special handling instructions..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-media">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Log Media</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reagents Logging Modal -->
+    <div id="reagents-modal" class="modal-overlay">
+        <div class="modal-content glass">
+            <header class="modal-header">
+                <h2>Log Laboratory Reagent</h2>
+                <button class="close-btn" id="close-reagents-modal">&times;</button>
+            </header>
+            <form id="reagents-form">
+                <div class="form-group">
+                    <label for="reagent-name">Reagent Name</label>
+                    <input type="text" id="reagent-name" placeholder="e.g. PBS 10X Buffer" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reagent-icon">Icon</label>
+                        <select id="reagent-icon">
+                            <option value="🧪">🧪 Tube</option>
+                            <option value="🧴">🧴 Bottle</option>
+                            <option value="⚗️">⚗️ Chemicals</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reagent-status">Supply Status</label>
+                        <select id="reagent-status">
+                            <option value="In Stock">In Stock</option>
+                            <option value="Low Stock">Low Stock</option>
+                            <option value="Almost Consumed">Almost Consumed</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reagent-supplier">Supplier</label>
+                    <input type="text" id="reagent-supplier" placeholder="e.g. Sigma-Aldrich, Merck" required>
+                </div>
+                <div class="form-group">
+                    <label for="reagent-notes">Technical Notes</label>
+                    <textarea id="reagent-notes" placeholder="Storage conditions or concentration info..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-reagent">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Log Reagent</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Maintenance Request Modal -->
+    <div id="maintenance-modal" class="modal-overlay">
+        <div class="modal-content glass">
+            <header class="modal-header">
+                <h2>Equipment Status Report</h2>
+                <button class="close-btn" id="close-maintenance-modal">&times;</button>
+            </header>
+            <form id="maintenance-form">
+                <div class="form-group">
+                    <label for="maint-name">Equipment / System Name</label>
+                    <input type="text" id="maint-name" placeholder="e.g. Centrifuge X-9" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="maint-icon">Representative Icon</label>
+                        <select id="maint-icon">
+                            <option value="🔬">🔬 Microscope</option>
+                            <option value="🧬">🧬 PCR / DNA</option>
+                            <option value="⚗️">⚗️ Analytical</option>
+                            <option value="❄️">❄️ Cold Storage</option>
+                            <option value="💻">💻 Compute System</option>
+                            <option value="🛠️">🛠️ Other Hardware</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="maint-status">Current Status</label>
+                        <select id="maint-status">
+                            <option value="online">Online / Nominal</option>
+                            <option value="offline">Offline / Down</option>
+                            <option value="maintenance">Under Maintenance</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="maint-supplier">Supplier / Maintenance Provider</label>
+                    <input type="text" id="maint-supplier" placeholder="e.g. Thermo Fisher, Agilent, Internal" required>
+                </div>
+                <div class="form-group">
+                    <label for="maint-notes">Technical Notes</label>
+                    <textarea id="maint-notes" placeholder="Describe the current status or reported issue..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-maintenance">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update System Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Deletion Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-content glass confirm-box">
+            <header class="modal-header">
+                <h2>Confirm Deletion</h2>
+            </header>
+            <div class="confirm-body">
+                <p id="confirm-message">Are you sure you want to remove this equipment from the diagnostics log?</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="confirm-cancel">Keep Equipment</button>
+                <button type="button" class="btn btn-primary btn-danger" id="confirm-yes">Yes, Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
