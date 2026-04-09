@@ -62,6 +62,7 @@ const suppliesModal = document.getElementById('supplies-modal');
 const mediaForm = document.getElementById('media-form');
 const reagentsForm = document.getElementById('reagents-form');
 const suppliesForm = document.getElementById('supplies-form');
+const analyticsContainer = document.getElementById('analytics-container');
 
 let pendingDeleteId = null;
 let pendingDeleteCategory = null;
@@ -81,6 +82,24 @@ function formatTo12Hr(time24) {
     const ampm = h >= 12 ? 'PM' : 'AM';
     const h12 = h % 12 || 12;
     return `${h12}:${minutes} ${ampm}`;
+}
+
+/**
+ * Checks for booking conflicts.
+ * Returns the conflicting booking object or null.
+ */
+function checkBookingConflict(resource, dateKey, start, end) {
+    const dayBookings = state.bookings[dateKey] || [];
+    const newStart = parseInt(start.replace(':', ''), 10);
+    const newEnd = parseInt(end.replace(':', ''), 10);
+
+    return dayBookings.find(b => {
+        if (b.resource !== resource) return false;
+        const bStart = parseInt(b.start_time.replace(':', ''), 10);
+        const bEnd = parseInt(b.end_time.replace(':', ''), 10);
+        // Overlap logic: (StartA < EndB) && (EndA > StartB)
+        return (newStart < bEnd) && (newEnd > bStart);
+    });
 }
 
 /**
@@ -143,6 +162,74 @@ function getTimePickerValue(containerId) {
     return `${String(h).padStart(2, '0')}:${m}`;
 }
 
+/**
+ * Renders weekly equipment usage analytics widget.
+ */
+function renderWeeklyAnalytics() {
+    if (!analyticsContainer) return;
+    analyticsContainer.innerHTML = '';
+
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 is Sunday
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - dayOfWeek);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    const usageData = {};
+    const iconMap = {
+        'Confocal Microscope': '🔬',
+        'PCR Thermal Cycler': '🧬',
+        'Mass Spectrometer': '⚗️',
+        'Ultra-Low Freezer': '❄️',
+        'Centrifuge X-1': '🌀',
+        'Biosafety Cabinet': '🛡️'
+    };
+
+    // Aggregate sessions within the week
+    Object.keys(state.bookings).forEach(dateKey => {
+        const d = new Date(dateKey + 'T00:00:00');
+        if (d >= startOfWeek && d <= endOfWeek) {
+            state.bookings[dateKey].forEach(b => {
+                usageData[b.resource] = (usageData[b.resource] || 0) + 1;
+            });
+        }
+    });
+
+    const sortedResources = Object.entries(usageData)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4); // Top 4
+
+    if (sortedResources.length === 0) {
+        analyticsContainer.innerHTML = '<div class="empty-agenda" style="grid-column: 1/-1;">No session data for this week yet.</div>';
+        return;
+    }
+
+    const maxUsage = sortedResources[0][1];
+
+    sortedResources.forEach(([name, count]) => {
+        const percentage = (count / maxUsage) * 100;
+        const icon = iconMap[name] || '🛠️';
+        
+        const card = document.createElement('div');
+        card.className = 'analytics-card glass';
+        card.innerHTML = `
+            <div class="card-header">
+                <span class="icon">${icon}</span>
+                <span class="usage-count">${count} sessions</span>
+            </div>
+            <div class="resource-name">${name}</div>
+            <div class="usage-bar-bg">
+                <div class="usage-bar-fill" style="width: ${percentage}%"></div>
+            </div>
+        `;
+        analyticsContainer.appendChild(card);
+    });
+}
+
 // =============================================
 // --- CORE INIT & CLOCK ---
 // =============================================
@@ -163,6 +250,7 @@ async function init() {
     renderInventory('media');
     renderInventory('reagents');
     renderSupplies();
+    renderWeeklyAnalytics();
     updateClock();
     setInterval(updateClock, 1000);
     setupEventListeners();
@@ -755,6 +843,7 @@ function setupEventListeners() {
                         .filter(b => b.id !== pendingDeleteId);
                     renderCalendar();
                     renderAgenda(pendingDeleteDateKey);
+                    renderWeeklyAnalytics();
                 } else if (pendingDeleteCategory === 'maintenance') {
                     state.maintenance = state.maintenance.filter(i => i.id !== pendingDeleteId);
                     renderMaintenance();
@@ -802,6 +891,14 @@ function setupEventListeners() {
         const studentName = document.getElementById('student-name').value;
         const resource = resourceInput.value;
 
+        // Conflict Detection Check
+        const conflict = checkBookingConflict(resource, dateKey, startTime, endTime);
+        if (conflict) {
+            showToast(`Conflict: ${resource} is already booked by ${conflict.user_name} from ${formatTo12Hr(conflict.start_time)} to ${formatTo12Hr(conflict.end_time)}`, 'error');
+            updateStatus('Conflict Blocked', 'red');
+            return;
+        }
+
         const newBooking = {
             date_key: dateKey,
             resource: resource,
@@ -821,6 +918,7 @@ function setupEventListeners() {
             if (!state.bookings[b.date_key]) state.bookings[b.date_key] = [];
             state.bookings[b.date_key].push(b);
             renderCalendar();
+            renderWeeklyAnalytics();
             // Background sync
             fetchFullState();
         } else {
@@ -856,6 +954,7 @@ async function fetchFullState() {
         state.reagents = reagents.data || [];
         state.supplies = supplies.data || [];
 
+        renderWeeklyAnalytics();
         updateStatus('Cloud Sync: Active', 'success');
     } catch (err) {
         console.error('fetchFullState error:', err);

@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=10">
+    <link rel="stylesheet" href="styles.css?v=11">
 </head>
 
 <body class="dark-theme">
@@ -75,6 +75,13 @@
 
             <section class="dashboard-scrollable">
                 <div id="schedule-view">
+                    <div id="analytics-view">
+                        <h2 class="analytics-section-title">Weekly Equipment Utilization</h2>
+                        <div class="analytics-container" id="analytics-container">
+                            <!-- JS will populate cards here -->
+                        </div>
+                    </div>
+
                     <!-- Lab Protocol Alert -->
                     <div class="protocol-alert glass">
                         <div class="alert-icon">⚠️</div>
@@ -441,7 +448,7 @@
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=10"></script>
+    <script src="app.js?v=11"></script>
 </body>
 
 </html>
