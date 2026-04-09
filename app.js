@@ -583,14 +583,17 @@ function setupEventListeners() {
             supplier: document.getElementById('media-supplier').value,
             notes: document.getElementById('media-notes').value
         };
-        const { error } = await db.from('media').insert([newItem]);
-        if (!error) {
+        const { data, error } = await db.from('media').insert([newItem]).select();
+        if (!error && data) {
             mediaModal.classList.remove('active');
             mediaForm.reset();
             showToast('Media Inventory Updated');
             updateStatus('Synced', 'success');
-            // Explicitly refresh state and UI
-            fetchFullState().then(() => renderInventory('media'));
+            // Optimistic Instant Update
+            state.media.push(data[0]);
+            renderInventory('media');
+            // Background sync
+            fetchFullState();
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -609,14 +612,17 @@ function setupEventListeners() {
             supplier: document.getElementById('reagent-supplier').value,
             notes: document.getElementById('reagent-notes').value
         };
-        const { error } = await db.from('reagents').insert([newItem]);
-        if (!error) {
+        const { data, error } = await db.from('reagents').insert([newItem]).select();
+        if (!error && data) {
             reagentsModal.classList.remove('active');
             reagentsForm.reset();
             showToast('Reagent Logged Successfully');
             updateStatus('Synced', 'success');
-            // Explicitly refresh state and UI
-            fetchFullState().then(() => renderInventory('reagents'));
+            // Optimistic Instant Update
+            state.reagents.push(data[0]);
+            renderInventory('reagents');
+            // Background sync
+            fetchFullState();
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -635,14 +641,18 @@ function setupEventListeners() {
             unit_cost: parseFloat(document.getElementById('supply-unit-cost').value) || 0,
             supplier: document.getElementById('supply-supplier').value
         };
-        const { error } = await db.from('supplies').insert([newItem]);
-        if (!error) {
+        const { data, error } = await db.from('supplies').insert([newItem]).select();
+        if (!error && data) {
             suppliesModal.classList.remove('active');
             suppliesForm.reset();
             showToast('Supply Catalog Updated');
             updateStatus('Synced', 'success');
-            // Explicitly refresh state and UI
-            fetchFullState().then(() => renderSupplies());
+            // Optimistic Instant Update
+            if (!state.supplies) state.supplies = [];
+            state.supplies.push(data[0]);
+            renderSupplies();
+            // Background sync
+            fetchFullState();
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -661,14 +671,17 @@ function setupEventListeners() {
             supplier: document.getElementById('maint-supplier').value,
             notes: document.getElementById('maint-notes').value
         };
-        const { error } = await db.from('maintenance').insert([newItem]);
-        if (!error) {
+        const { data, error } = await db.from('maintenance').insert([newItem]).select();
+        if (!error && data) {
             maintenanceModal.classList.remove('active');
             maintenanceForm.reset();
             showToast('System Diagnostics Updated');
             updateStatus('Synced', 'success');
-            // Explicitly refresh state and UI
-            fetchFullState().then(() => renderMaintenance());
+            // Optimistic Instant Update
+            state.maintenance.push(data[0]);
+            renderMaintenance();
+            // Background sync
+            fetchFullState();
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -753,16 +766,19 @@ function setupEventListeners() {
             user_name: studentName
         };
 
-        const { error } = await db.from('bookings').insert([newBooking]);
-        if (!error) {
+        const { data, error } = await db.from('bookings').insert([newBooking]).select();
+        if (!error && data) {
             showToast('Booking Successful');
             updateStatus('Synced', 'success');
             bookingModal.classList.remove('active');
             bookingForm.reset();
-            // Explicitly refresh state and UI
-            fetchFullState().then(() => {
-                renderCalendar();
-            });
+            // Optimistic Instant Update
+            const b = data[0];
+            if (!state.bookings[b.date_key]) state.bookings[b.date_key] = [];
+            state.bookings[b.date_key].push(b);
+            renderCalendar();
+            // Background sync
+            fetchFullState();
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
