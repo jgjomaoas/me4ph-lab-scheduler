@@ -651,7 +651,7 @@ function setupEventListeners() {
         'nav-reagents':    { view: 'reagents-view',     title: 'Chemicals & Reagents',     render: () => renderInventory('reagents') },
         'nav-supplies':    { view: 'supplies-view',     title: 'Supplies & Materials',     render: () => renderSupplies() },
         'nav-maintenance': { view: 'maintenance-view',  title: 'Hardware Diagnostics',     render: () => renderMaintenance() },
-        'nav-reports':     { view: 'reports-view',      title: 'Lab Usage Audit',          render: () => renderReports('yesterday') }
+        'nav-reports':     { view: 'reports-view',      title: 'Lab Audit Log',            render: () => renderReports('yesterday') }
     };
 
     Object.keys(navItems).forEach(id => {
@@ -707,52 +707,25 @@ function setupEventListeners() {
         });
     });
 
-    // Export CSV Button
-    const exportBtn = document.getElementById('export-csv-btn');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', downloadReportsCSV);
+    // Download TXT Button
+    const txtBtn = document.getElementById('export-txt-btn');
+    if (txtBtn) {
+        txtBtn.addEventListener('click', downloadReportsTXT);
     }
 
-    // Export Modal Controls
+    // Save as PDF Button
+    const pdfBtn = document.getElementById('export-pdf-btn');
+    if (pdfBtn) {
+        pdfBtn.addEventListener('click', () => {
+            window.print();
+        });
+    }
+
+    // Export Modal Controls (Fallback for clipboard)
     const exportModal = document.getElementById('export-modal');
     const closeExport = document.getElementById('close-export-modal');
     if (closeExport && exportModal) {
         closeExport.addEventListener('click', () => exportModal.classList.remove('active'));
-    }
-
-    const copyBtn = document.getElementById('copy-csv-btn');
-    if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
-            const area = document.getElementById('csv-preview-area');
-            if (area) {
-                area.select();
-                navigator.clipboard.writeText(area.value).then(() => {
-                    showToast('CSV copied to clipboard!');
-                    copyBtn.textContent = '✅ Copied!';
-                    setTimeout(() => copyBtn.textContent = '📋 Copy to Clipboard', 2000);
-                });
-            }
-        });
-    }
-
-    const shareBtn = document.getElementById('share-csv-btn');
-    if (shareBtn) {
-        if (!navigator.share) {
-            shareBtn.style.display = 'none';
-        } else {
-            shareBtn.addEventListener('click', async () => {
-                const csvData = document.getElementById('csv-preview-area').value;
-                try {
-                    await navigator.share({
-                        title: 'Lab Audit Report',
-                        text: csvData,
-                        url: window.location.href
-                    });
-                } catch (err) {
-                    console.error('Share failed', err);
-                }
-            });
-        }
     }
 
     // --- Form Submissions ---
@@ -1150,8 +1123,14 @@ function processReportData(start, end) {
         topStudentEl.textContent = topStudent ? topStudent[0] : '—';
     }
     
-    // Store current filtered data for CSV export
+    // Store current filtered data for export
     window.currentReportData = flatBookings;
+    
+    // Set date for print header
+    const reportView = document.getElementById('reports-view');
+    if (reportView) {
+        reportView.setAttribute('data-date', new Date().toLocaleDateString());
+    }
 }
 
 /**
@@ -1183,16 +1162,36 @@ function downloadReportsCSV() {
         })
     ];
 
-    const csvString = '\ufeff' + csvRows.join('\n'); // Add BOM
-    
-    // 1. ATTEMPT AUTOMATIC DOWNLOAD (Improved Blob approach)
-    const blob = new Blob([csvString], { type: 'application/octet-stream' });
+/**
+ * Generates and downloads a plain text (Notepad) audit log.
+ */
+function downloadReportsTXT() {
+    const data = window.currentReportData;
+    if (!data || data.length === 0) {
+        showToast('No data available to export', 'warning');
+        return;
+    }
+
+    let txtContent = "ME4PH LABORATORY - AUDIT REPORT\n";
+    txtContent += "Generated on: " + new Date().toLocaleString() + "\n";
+    txtContent += "================================================\n\n";
+
+    data.forEach(b => {
+        txtContent += `DATE: ${b.date_key}\n`;
+        txtContent += `STUDENT: ${b.user_name}\n`;
+        txtContent += `EQUIPMENT: ${b.resource}\n`;
+        txtContent += `TIME: ${formatTo12Hr(b.start_time)} - ${formatTo12Hr(b.end_time)}\n`;
+        txtContent += `PURPOSE: ${b.notes || 'N/A'}\n`;
+        txtContent += "------------------------------------------------\n";
+    });
+
+    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     
     const link = document.createElement("a");
     link.style.display = 'none';
     link.href = url;
-    link.download = `ME4PH_Lab_Audit_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `ME4PH_Lab_Audit.txt`;
     
     document.body.appendChild(link);
     link.click();
@@ -1201,15 +1200,24 @@ function downloadReportsCSV() {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
     }, 200);
-
-    // 2. OPEN FAIL-SAFE MODAL
-    const exportModal = document.getElementById('export-modal');
-    const previewArea = document.getElementById('csv-preview-area');
     
-    if (exportModal && previewArea) {
-        previewArea.value = csvString.replace('\ufeff', ''); // Strip BOM for display
-        exportModal.classList.add('active');
-    }
-    
-    showToast('Exporting... If download fails, use the Copy tool');
+    showToast('Audit Log exported as Notepad TXT');
 }
+
+// =============================================
+// --- LOCAL STORAGE ---
+// =============================================
+
+function saveStateLocal() {
+    localStorage.setItem('me4ph_theme', state.theme);
+}
+
+function loadStateLocal() {
+    const savedTheme = localStorage.getItem('me4ph_theme');
+    if (savedTheme) state.theme = savedTheme;
+}
+
+// =============================================
+// --- BOOT ---
+// =============================================
+init();
