@@ -204,7 +204,7 @@ async function removeBooking(id, dateKey) {
         showToast('Reservation cancelled');
         updateStatus('Synced', 'success');
     } else {
-        showToast('Sync Failed', 'error');
+        console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
         updateStatus('Error', 'red');
     }
 }
@@ -422,7 +422,7 @@ function setupEventListeners() {
             showToast('Media Inventory Updated');
             updateStatus('Synced', 'success');
         } else {
-            showToast('Sync Failed', 'error');
+            console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
             updateStatus('Error', 'red');
         }
     });
@@ -444,7 +444,7 @@ function setupEventListeners() {
             showToast('Reagent Logged Successfully');
             updateStatus('Synced', 'success');
         } else {
-            showToast('Sync Failed', 'error');
+            console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
             updateStatus('Error', 'red');
         }
     });
@@ -466,7 +466,7 @@ function setupEventListeners() {
             showToast('System Diagnostics Updated');
             updateStatus('Synced', 'success');
         } else {
-            showToast('Sync Failed', 'error');
+            console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
             updateStatus('Error', 'red');
         }
     });
@@ -507,7 +507,7 @@ function setupEventListeners() {
                 showToast('Item removed successfully');
                 updateStatus('Synced', 'success');
             } else {
-                showToast('Sync Failed', 'error');
+                console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
                 updateStatus('Error', 'red');
             }
         }
@@ -549,7 +549,7 @@ function setupEventListeners() {
             bookingModal.classList.remove('active');
             bookingForm.reset();
         } else {
-            showToast('Sync Failed', 'error');
+            console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
             updateStatus('Error', 'red');
         }
     });
