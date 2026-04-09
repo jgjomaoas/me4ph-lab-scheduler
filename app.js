@@ -1125,9 +1125,9 @@ function downloadReportsCSV() {
     // CSV Headers
     const headers = ['Date', 'Student', 'Resource', 'Time In', 'Time Out', 'Purpose'];
     
-    // Prepare rows (Add \ufeff BOM at the start of the first row)
+    // Prepare rows
     const csvRows = [
-        '\ufeff' + headers.join(','),
+        headers.join(','),
         ...data.map(b => {
             const row = [
                 b.date_key,
@@ -1141,23 +1141,23 @@ function downloadReportsCSV() {
         })
     ];
 
-    const csvString = csvRows.join('\n');
-    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    const csvString = '\ufeff' + csvRows.join('\n'); // Add BOM
+    
+    // Use Base64 encoding for maximum compatibility with generic download handlers
+    const base64Data = btoa(unescape(encodeURIComponent(csvString)));
+    const dataUri = 'data:text/csv;base64,' + base64Data;
     
     const link = document.createElement("a");
     link.style.display = 'none';
-    link.href = url;
+    link.href = dataUri;
     link.download = `ME4PH_Lab_Audit.csv`;
     
     document.body.appendChild(link);
     link.click();
     
-    // Slight delay before cleanup prevents "Aborted" downloads in some browsers
     setTimeout(() => {
         document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }, 150);
+    }, 200);
     
     showToast('Audit Log exported successfully');
 }
