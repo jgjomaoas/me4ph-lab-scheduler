@@ -724,6 +724,26 @@ function setupEventListeners() {
             if (!error) {
                 showToast('Item removed successfully');
                 updateStatus('Synced', 'success');
+
+                // Optimistic Instant Delete (Local State Sync)
+                if (pendingDeleteCategory === 'booking' && pendingDeleteDateKey) {
+                    state.bookings[pendingDeleteDateKey] = (state.bookings[pendingDeleteDateKey] || [])
+                        .filter(b => b.id !== pendingDeleteId);
+                    renderCalendar();
+                    renderAgenda(pendingDeleteDateKey);
+                } else if (pendingDeleteCategory === 'maintenance') {
+                    state.maintenance = state.maintenance.filter(i => i.id !== pendingDeleteId);
+                    renderMaintenance();
+                } else if (pendingDeleteCategory === 'supplies') {
+                    state.supplies = state.supplies.filter(i => i.id !== pendingDeleteId);
+                    renderSupplies();
+                } else if (state[pendingDeleteCategory]) {
+                    state[pendingDeleteCategory] = state[pendingDeleteCategory].filter(i => i.id !== pendingDeleteId);
+                    renderInventory(pendingDeleteCategory);
+                }
+                
+                // Background sync verify
+                fetchFullState();
             } else {
                 console.error('Supabase error:', JSON.stringify(error));
                 showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
