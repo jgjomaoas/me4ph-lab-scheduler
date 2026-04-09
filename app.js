@@ -170,6 +170,18 @@ async function init() {
     // Initialize time pickers after DOM is fully ready
     initTimePicker('start-time-picker', '08:00');
     initTimePicker('end-time-picker', '17:00');
+
+    // Add listener for the new "Add Reservation" button in the agenda
+    const addResBtn = document.getElementById('add-res-btn');
+    if (addResBtn) {
+        addResBtn.addEventListener('click', () => {
+            if (state.selectedDate) {
+                openBookingModal(state.selectedDate);
+            } else {
+                openBookingModal(new Date());
+            }
+        });
+    }
 }
 
 function updateStatus(text, type = 'success') {
@@ -246,8 +258,11 @@ function renderCalendar() {
         `;
 
         cell.addEventListener('click', () => {
-            openBookingModal(cellDate);
+            state.selectedDate = cellDate;
             renderAgenda(dateKey);
+            // Highlight selected cell
+            document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected-day'));
+            cell.classList.add('selected-day');
         });
         calendarGrid.appendChild(cell);
         renderEventsForDay(dateKey);
@@ -277,6 +292,10 @@ function renderAgenda(dateKey) {
     const isToday = dateKey === formatDateKey(new Date());
     if (agendaTitle) agendaTitle.textContent = isToday ? "Today's Agenda" : "Daily Agenda";
     agendaDateLabel.textContent = targetDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+    // Show the Add Reservation button when a date is selected
+    const addResBtn = document.getElementById('add-res-btn');
+    if (addResBtn) addResBtn.classList.remove('hidden');
 
     if (dayBookings.length === 0) {
         agendaList.innerHTML = `<div class="empty-agenda">No reservations for ${dateKey === formatDateKey(new Date()) ? 'today' : 'this date'}.</div>`;

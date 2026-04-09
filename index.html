@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=9">
+    <link rel="stylesheet" href="styles.css?v=10">
 </head>
 
 <body class="dark-theme">
@@ -114,6 +114,7 @@
                             <div class="agenda-header">
                                 <h3>Today's Agenda</h3>
                                 <span class="agenda-date" id="agenda-date-label">April 9, 2026</span>
+                                <button class="btn btn-primary add-res-btn hidden" id="add-res-btn" style="width:100%; margin-top:12px; font-size:12px; padding:8px;">+ Add Reservation</button>
                             </div>
                             <div class="agenda-list" id="agenda-list">
                                 <!-- JS will populate agenda items here -->
@@ -440,7 +441,7 @@
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=9"></script>
+    <script src="app.js?v=10"></script>
 </body>
 
 </html>
