@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=19">
+    <link rel="stylesheet" href="styles.css?v=20">
 </head>
 
 <body class="dark-theme">
@@ -496,12 +496,32 @@
         </div>
     </div>
 
+    <!-- Export/Share Modal -->
+    <div id="export-modal" class="modal-overlay">
+        <div class="modal-content glass" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Ready to Export</h2>
+                <button class="close-btn" id="close-export-modal">&times;</button>
+            </div>
+            <div class="export-content">
+                <p class="subtitle" style="font-size: 13px; opacity: 0.8; margin-bottom: 15px;">
+                    An automatic download was attempted. If it failed, use the tools below:
+                </p>
+                <textarea id="csv-preview-area" class="csv-preview" readonly></textarea>
+                <div class="modal-actions" style="margin-top: 20px;">
+                    <button class="btn btn-copy" id="copy-csv-btn">📋 Copy to Clipboard</button>
+                    <button class="btn btn-share" id="share-csv-btn">📤 Share File</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=19"></script>
+    <script src="app.js?v=20"></script>
 </body>
 
 </html>

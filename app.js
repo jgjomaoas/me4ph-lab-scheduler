@@ -713,6 +713,48 @@ function setupEventListeners() {
         exportBtn.addEventListener('click', downloadReportsCSV);
     }
 
+    // Export Modal Controls
+    const exportModal = document.getElementById('export-modal');
+    const closeExport = document.getElementById('close-export-modal');
+    if (closeExport && exportModal) {
+        closeExport.addEventListener('click', () => exportModal.classList.remove('active'));
+    }
+
+    const copyBtn = document.getElementById('copy-csv-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            const area = document.getElementById('csv-preview-area');
+            if (area) {
+                area.select();
+                navigator.clipboard.writeText(area.value).then(() => {
+                    showToast('CSV copied to clipboard!');
+                    copyBtn.textContent = '✅ Copied!';
+                    setTimeout(() => copyBtn.textContent = '📋 Copy to Clipboard', 2000);
+                });
+            }
+        });
+    }
+
+    const shareBtn = document.getElementById('share-csv-btn');
+    if (shareBtn) {
+        if (!navigator.share) {
+            shareBtn.style.display = 'none';
+        } else {
+            shareBtn.addEventListener('click', async () => {
+                const csvData = document.getElementById('csv-preview-area').value;
+                try {
+                    await navigator.share({
+                        title: 'Lab Audit Report',
+                        text: csvData,
+                        url: window.location.href
+                    });
+                } catch (err) {
+                    console.error('Share failed', err);
+                }
+            });
+        }
+    }
+
     // --- Form Submissions ---
 
     // Media Form
@@ -1143,21 +1185,31 @@ function downloadReportsCSV() {
 
     const csvString = '\ufeff' + csvRows.join('\n'); // Add BOM
     
-    // Use Base64 encoding for maximum compatibility with generic download handlers
-    const base64Data = btoa(unescape(encodeURIComponent(csvString)));
-    const dataUri = 'data:text/csv;base64,' + base64Data;
+    // 1. ATTEMPT AUTOMATIC DOWNLOAD (Improved Blob approach)
+    const blob = new Blob([csvString], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
     
     const link = document.createElement("a");
     link.style.display = 'none';
-    link.href = dataUri;
-    link.download = `ME4PH_Lab_Audit.csv`;
+    link.href = url;
+    link.download = `ME4PH_Lab_Audit_${new Date().toISOString().split('T')[0]}.csv`;
     
     document.body.appendChild(link);
     link.click();
     
     setTimeout(() => {
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }, 200);
+
+    // 2. OPEN FAIL-SAFE MODAL
+    const exportModal = document.getElementById('export-modal');
+    const previewArea = document.getElementById('csv-preview-area');
     
-    showToast('Audit Log exported successfully');
+    if (exportModal && previewArea) {
+        previewArea.value = csvString.replace('\ufeff', ''); // Strip BOM for display
+        exportModal.classList.add('active');
+    }
+    
+    showToast('Exporting... If download fails, use the Copy tool');
 }
