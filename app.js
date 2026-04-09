@@ -1118,30 +1118,42 @@ function processReportData(start, end) {
 function downloadReportsCSV() {
     const data = window.currentReportData;
     if (!data || data.length === 0) {
-        showToast('No data available to export', 'warning');
+        showToast('No data available to export for this period', 'warning');
         return;
     }
 
+    // CSV Headers
     const headers = ['Date', 'Student', 'Resource', 'Time In', 'Time Out', 'Purpose'];
-    const rows = data.map(b => [
-        b.date_key,
-        b.user_name,
-        b.resource,
-        formatTo12Hr(b.start_time),
-        formatTo12Hr(b.end_time),
-        (b.notes || '').replace(/,/g, ';')
-    ]);
+    
+    // Prepare rows with proper CSV escaping
+    const csvRows = [
+        headers.join(','),
+        ...data.map(b => {
+            const row = [
+                b.date_key,
+                b.user_name,
+                b.resource,
+                formatTo12Hr(b.start_time),
+                formatTo12Hr(b.end_time),
+                (b.notes || '').replace(/"/g, '""').replace(/,/g, ';') // Simple escape
+            ];
+            return row.map(val => `"${val}"`).join(','); // Wrap in quotes
+        })
+    ];
 
-    let csvContent = "data:text/csv;charset=utf-8," 
-        + headers.join(",") + "\n"
-        + rows.map(r => r.join(",")).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
+    const csvString = csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.setAttribute("href", url);
     link.setAttribute("download", `ME4PH_Lab_Audit_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
+    
+    // Cleanup
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
     showToast('Audit Log exported successfully');
 }
