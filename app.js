@@ -50,6 +50,7 @@ const reportIssueBtn = document.getElementById('report-issue-btn');
 const maintenanceGrid = document.getElementById('maintenance-grid');
 const confirmModal = document.getElementById('confirm-modal');
 const toastContainer = document.getElementById('toast-container');
+const agendaTitle = document.querySelector('.agenda-header h3');
 
 // Inventory Elements
 const mediaGrid = document.getElementById('media-grid');
@@ -244,7 +245,10 @@ function renderCalendar() {
             <div class="day-events" id="events-${dateKey}"></div>
         `;
 
-        cell.addEventListener('click', () => openBookingModal(cellDate));
+        cell.addEventListener('click', () => {
+            openBookingModal(cellDate);
+            renderAgenda(dateKey);
+        });
         calendarGrid.appendChild(cell);
         renderEventsForDay(dateKey);
     }
@@ -270,7 +274,8 @@ function renderAgenda(dateKey) {
     const targetDate = new Date(dateKey + 'T00:00:00');
     const isPast = targetDate < today;
 
-    // Format label
+    const isToday = dateKey === formatDateKey(new Date());
+    if (agendaTitle) agendaTitle.textContent = isToday ? "Today's Agenda" : "Daily Agenda";
     agendaDateLabel.textContent = targetDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
     if (dayBookings.length === 0) {
