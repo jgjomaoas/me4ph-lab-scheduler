@@ -1125,9 +1125,9 @@ function downloadReportsCSV() {
     // CSV Headers
     const headers = ['Date', 'Student', 'Resource', 'Time In', 'Time Out', 'Purpose'];
     
-    // Prepare rows with proper CSV escaping
+    // Prepare rows (Add \ufeff BOM at the start of the first row)
     const csvRows = [
-        headers.join(','),
+        '\ufeff' + headers.join(','),
         ...data.map(b => {
             const row = [
                 b.date_key,
@@ -1135,9 +1135,9 @@ function downloadReportsCSV() {
                 b.resource,
                 formatTo12Hr(b.start_time),
                 formatTo12Hr(b.end_time),
-                (b.notes || '').replace(/"/g, '""').replace(/,/g, ';') // Simple escape
+                (b.notes || '').replace(/"/g, '""').replace(/,/g, ';')
             ];
-            return row.map(val => `"${val}"`).join(','); // Wrap in quotes
+            return row.map(val => `"${val}"`).join(',');
         })
     ];
 
@@ -1146,14 +1146,18 @@ function downloadReportsCSV() {
     const url = URL.createObjectURL(blob);
     
     const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `ME4PH_Lab_Audit_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.display = 'none';
+    link.href = url;
+    link.download = `ME4PH_Lab_Audit.csv`;
+    
     document.body.appendChild(link);
     link.click();
     
-    // Cleanup
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    // Slight delay before cleanup prevents "Aborted" downloads in some browsers
+    setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }, 150);
     
     showToast('Audit Log exported successfully');
 }
