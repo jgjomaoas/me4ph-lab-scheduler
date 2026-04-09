@@ -85,17 +85,30 @@ function formatTo12Hr(time24) {
 }
 
 /**
- * Checks for booking conflicts.
+ * Normalizes a resource name by lowercasing and removing common filler words.
+ * This ensures "PCR" and "PCR Machine" are treated as the same resource.
+ */
+function normalizeResourceName(name) {
+    if (!name) return '';
+    return name.toLowerCase()
+        .replace(/\b(machine|system|equipment|bench|space|room|unit|set)\b/g, '')
+        .replace(/[^a-z0-9]/g, '')
+        .trim();
+}
+
+/**
+ * Checks for booking conflicts using fuzzy matching.
  * Returns the conflicting booking object or null.
  */
 function checkBookingConflict(resource, dateKey, start, end) {
     const dayBookings = state.bookings[dateKey] || [];
     const newStart = parseInt(start.replace(':', ''), 10);
     const newEnd = parseInt(end.replace(':', ''), 10);
+    const newNorm = normalizeResourceName(resource);
 
     return dayBookings.find(b => {
-        const isSameResource = b.resource.toLowerCase().trim() === resource.toLowerCase().trim();
-        if (!isSameResource) return false;
+        const existingNorm = normalizeResourceName(b.resource);
+        if (existingNorm !== newNorm) return false;
 
         const bStart = parseInt(b.start_time.replace(':', ''), 10);
         const bEnd = parseInt(b.end_time.replace(':', ''), 10);
