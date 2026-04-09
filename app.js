@@ -650,7 +650,8 @@ function setupEventListeners() {
         'nav-media':       { view: 'media-view',        title: 'Media Inventory',         render: () => renderInventory('media') },
         'nav-reagents':    { view: 'reagents-view',     title: 'Chemicals & Reagents',     render: () => renderInventory('reagents') },
         'nav-supplies':    { view: 'supplies-view',     title: 'Supplies & Materials',     render: () => renderSupplies() },
-        'nav-maintenance': { view: 'maintenance-view',  title: 'Hardware Diagnostics',     render: () => renderMaintenance() }
+        'nav-maintenance': { view: 'maintenance-view',  title: 'Hardware Diagnostics',     render: () => renderMaintenance() },
+        'nav-reports':     { view: 'reports-view',      title: 'Lab Usage Audit',          render: () => renderReports('yesterday') }
     };
 
     Object.keys(navItems).forEach(id => {
@@ -695,6 +696,21 @@ function setupEventListeners() {
             applyTheme(nextTheme);
             showToast(`Laboratory switched to ${nextTheme === 'dark' ? 'Midnight' : 'Daylight'} mode`);
         });
+    }
+
+    // Reports Filter Buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderReports(btn.dataset.period);
+        });
+    });
+
+    // Export CSV Button
+    const exportBtn = document.getElementById('export-csv-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', downloadReportsCSV);
     }
 
     // --- Form Submissions ---
@@ -1014,3 +1030,118 @@ function loadStateLocal() {
 // --- BOOT ---
 // =============================================
 init();
+
+/**
+ * Renders the Reports view based on the selected period.
+ */
+function renderReports(period) {
+    const tableBody = document.getElementById('report-table-body');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+
+    const now = new Date();
+    let startDate = new Date(now);
+    
+    if (period === 'yesterday') {
+        startDate.setDate(now.getDate() - 1);
+        startDate.setHours(0,0,0,0);
+        const endDate = new Date(startDate);
+        endDate.setHours(23,59,59,999);
+        processReportData(startDate, endDate);
+    } else if (period === 'week') {
+        startDate.setDate(now.getDate() - 7);
+        processReportData(startDate, now);
+    } else if (period === 'month') {
+        startDate.setMonth(now.getMonth());
+        startDate.setDate(1);
+        startDate.setHours(0,0,0,0);
+        processReportData(startDate, now);
+    }
+}
+
+function processReportData(start, end) {
+    const tableBody = document.getElementById('report-table-body');
+    const flatBookings = [];
+    const resourceCounts = {};
+    const userCounts = {};
+
+    Object.keys(state.bookings).forEach(dateKey => {
+        const d = new Date(dateKey + 'T00:00:00');
+        if (d >= start && d <= end) {
+            state.bookings[dateKey].forEach(b => {
+                flatBookings.push({ ...b, date_key: dateKey });
+                resourceCounts[b.resource] = (resourceCounts[b.resource] || 0) + 1;
+                userCounts[b.user_name] = (userCounts[b.user_name] || 0) + 1;
+            });
+        }
+    });
+
+    // Sort by date descending
+    flatBookings.sort((a, b) => b.date_key.localeCompare(a.date_key) || b.start_time.localeCompare(a.start_time));
+
+    flatBookings.forEach(b => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${b.date_key}</td>
+            <td><strong>${b.user_name}</strong></td>
+            <td>${b.resource}</td>
+            <td>${formatTo12Hr(b.start_time)} – ${formatTo12Hr(b.end_time)}</td>
+            <td style="font-size:12px; opacity:0.8;">${b.notes || 'No notes provided'}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    // Summary Stats
+    const totalSessionsEl = document.getElementById('report-total-sessions');
+    const topResourceEl = document.getElementById('report-top-resource');
+    const topStudentEl = document.getElementById('report-top-student');
+
+    if (totalSessionsEl) totalSessionsEl.textContent = flatBookings.length;
+    
+    if (topResourceEl) {
+        const topResource = Object.entries(resourceCounts).sort((a,b) => b[1] - a[1])[0];
+        topResourceEl.textContent = topResource ? topResource[0] : '—';
+    }
+
+    if (topStudentEl) {
+        const topStudent = Object.entries(userCounts).sort((a,b) => b[1] - a[1])[0];
+        topStudentEl.textContent = topStudent ? topStudent[0] : '—';
+    }
+    
+    // Store current filtered data for CSV export
+    window.currentReportData = flatBookings;
+}
+
+/**
+ * Generates and downloads a CSV audit log.
+ */
+function downloadReportsCSV() {
+    const data = window.currentReportData;
+    if (!data || data.length === 0) {
+        showToast('No data available to export', 'warning');
+        return;
+    }
+
+    const headers = ['Date', 'Student', 'Resource', 'Time In', 'Time Out', 'Purpose'];
+    const rows = data.map(b => [
+        b.date_key,
+        b.user_name,
+        b.resource,
+        formatTo12Hr(b.start_time),
+        formatTo12Hr(b.end_time),
+        (b.notes || '').replace(/,/g, ';')
+    ]);
+
+    let csvContent = "data:text/csv;charset=utf-8," 
+        + headers.join(",") + "\n"
+        + rows.map(r => r.join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `ME4PH_Lab_Audit_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Audit Log exported successfully');
+}

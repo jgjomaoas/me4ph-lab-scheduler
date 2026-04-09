@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=15">
+    <link rel="stylesheet" href="styles.css?v=16">
 </head>
 
 <body class="dark-theme">
@@ -44,6 +44,10 @@
                     <li class="nav-item" id="nav-maintenance">
                         <span class="icon">🛠️</span>
                         <span class="label">Under Maintenance</span>
+                    </li>
+                    <li class="nav-item" id="nav-reports">
+                        <span class="icon">📊</span>
+                        <span class="label">Usage Reports</span>
                     </li>
                 </ul>
             </nav>
@@ -175,6 +179,55 @@
 
                     <div class="maintenance-grid" id="maintenance-grid">
                         <!-- JS will populate status-cards here -->
+                    </div>
+                </div>
+
+                <!-- Reports View -->
+                <div id="reports-view" class="view-section hidden">
+                    <div class="reports-dashboard">
+                        <div class="report-filters">
+                            <button class="filter-btn active" data-period="yesterday">Yesterday</button>
+                            <button class="filter-btn" data-period="week">Last 7 Days</button>
+                            <button class="filter-btn" data-period="month">This Month</button>
+                        </div>
+
+                        <div class="report-summary-cards">
+                            <div class="report-card glass">
+                                <span>Total Sessions</span>
+                                <h2 id="report-total-sessions">0</h2>
+                            </div>
+                            <div class="report-card glass">
+                                <span>Active Resource</span>
+                                <h2 id="report-top-resource">—</h2>
+                            </div>
+                            <div class="report-card glass">
+                                <span>Active Student</span>
+                                <h2 id="report-top-student">—</h2>
+                            </div>
+                        </div>
+
+                        <div class="export-section">
+                            <button class="btn btn-export" id="export-csv-btn">
+                                <span>📥</span> Export Audit Log (CSV)
+                            </button>
+                        </div>
+
+                        <div class="report-table-container glass">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Student</th>
+                                        <th>Resource</th>
+                                        <th>Time</th>
+                                        <th>Purpose</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-table-body">
+                                    <!-- Rows injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -448,7 +501,7 @@
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=15"></script>
+    <script src="app.js?v=16"></script>
 </body>
 
 </html>
