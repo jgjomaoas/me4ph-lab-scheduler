@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=11">
+    <link rel="stylesheet" href="styles.css?v=12">
 </head>
 
 <body class="dark-theme">
@@ -200,8 +200,17 @@
                 </div>
                 <div class="form-group">
                     <label for="resource-input">Equipment / Bench Space</label>
-                    <input type="text" id="resource-input" placeholder="e.g. PCR Machine, Bench 4, Flow Cytometer"
-                        required>
+                    <select id="resource-input" required>
+                        <option value="" disabled selected>Select equipment...</option>
+                        <option value="Confocal Microscope">🔬 Confocal Microscope</option>
+                        <option value="PCR Thermal Cycler">🧬 PCR Thermal Cycler</option>
+                        <option value="Mass Spectrometer">⚗️ Mass Spectrometer</option>
+                        <option value="Ultra-Low Freezer">❄️ Ultra-Low Freezer</option>
+                        <option value="Centrifuge X-1">🌀 Centrifuge X-1</option>
+                        <option value="Biosafety Cabinet">🛡️ Biosafety Cabinet</option>
+                        <option value="General Bench Space">🧪 General Bench Space</option>
+                        <option value="Incubator CO2">🌡️ Incubator CO2</option>
+                    </select>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -448,7 +457,7 @@
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=11"></script>
+    <script src="app.js?v=12"></script>
 </body>
 
 </html>

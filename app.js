@@ -94,7 +94,9 @@ function checkBookingConflict(resource, dateKey, start, end) {
     const newEnd = parseInt(end.replace(':', ''), 10);
 
     return dayBookings.find(b => {
-        if (b.resource !== resource) return false;
+        const isSameResource = b.resource.toLowerCase().trim() === resource.toLowerCase().trim();
+        if (!isSameResource) return false;
+
         const bStart = parseInt(b.start_time.replace(':', ''), 10);
         const bEnd = parseInt(b.end_time.replace(':', ''), 10);
         // Overlap logic: (StartA < EndB) && (EndA > StartB)
@@ -890,6 +892,9 @@ function setupEventListeners() {
         const endTime = getTimePickerValue('end-time-picker');
         const studentName = document.getElementById('student-name').value;
         const resource = resourceInput.value;
+
+        // Sync fresh data right before check to ensure multi-user integrity
+        await fetchFullState();
 
         // Conflict Detection Check
         const conflict = checkBookingConflict(resource, dateKey, startTime, endTime);
