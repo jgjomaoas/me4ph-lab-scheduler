@@ -109,7 +109,7 @@ function applyTheme(theme) {
             label.textContent = 'Midnight Mode';
         }
     }
-    saveState();
+    saveStateLocal();
 }
 
 function updateClock() {
