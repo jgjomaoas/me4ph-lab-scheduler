@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=21">
+    <link rel="stylesheet" href="styles.css?v=22">
 </head>
 
 <body class="dark-theme">
@@ -206,12 +206,9 @@
                             </div>
                         </div>
 
-                        <div class="export-section" style="gap: 12px; display: flex;">
-                            <button class="btn btn-export btn-txt" id="export-txt-btn">
-                                <span>📄</span> Download Notepad (TXT)
-                            </button>
-                            <button class="btn btn-export btn-print" id="export-pdf-btn">
-                                <span>🖨️</span> Save as PDF / Print
+                        <div class="export-section" style="display: flex; justify-content: flex-end;">
+                            <button class="btn btn-export" id="copy-audit-btn" style="background: #238636;">
+                                <span>📋</span> Copy Audit Log to Clipboard
                             </button>
                         </div>
 
@@ -524,7 +521,7 @@
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=21"></script>
+    <script src="app.js?v=22"></script>
 </body>
 
 </html>

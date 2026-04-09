@@ -707,25 +707,10 @@ function setupEventListeners() {
         });
     });
 
-    // Download TXT Button
-    const txtBtn = document.getElementById('export-txt-btn');
-    if (txtBtn) {
-        txtBtn.addEventListener('click', downloadReportsTXT);
-    }
-
-    // Save as PDF Button
-    const pdfBtn = document.getElementById('export-pdf-btn');
-    if (pdfBtn) {
-        pdfBtn.addEventListener('click', () => {
-            window.print();
-        });
-    }
-
-    // Export Modal Controls (Fallback for clipboard)
-    const exportModal = document.getElementById('export-modal');
-    const closeExport = document.getElementById('close-export-modal');
-    if (closeExport && exportModal) {
-        closeExport.addEventListener('click', () => exportModal.classList.remove('active'));
+    // Copy Audit Log Button
+    const copyBtn = document.getElementById('copy-audit-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', copyAuditLogToClipboard);
     }
 
     // --- Form Submissions ---
@@ -1163,12 +1148,12 @@ function downloadReportsCSV() {
     ];
 
 /**
- * Generates and downloads a plain text (Notepad) audit log.
+ * Generates the report text and copies it instantly to the clipboard.
  */
-function downloadReportsTXT() {
+async function copyAuditLogToClipboard() {
     const data = window.currentReportData;
     if (!data || data.length === 0) {
-        showToast('No data available to export', 'warning');
+        showToast('No data available to copy', 'warning');
         return;
     }
 
@@ -1185,23 +1170,20 @@ function downloadReportsTXT() {
         txtContent += "------------------------------------------------\n";
     });
 
-    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement("a");
-    link.style.display = 'none';
-    link.href = url;
-    link.download = `ME4PH_Lab_Audit.txt`;
-    
-    document.body.appendChild(link);
-    link.click();
-    
-    setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }, 200);
-    
-    showToast('Audit Log exported as Notepad TXT');
+    try {
+        await navigator.clipboard.writeText(txtContent);
+        showToast('✅ Audit Log copied to clipboard!');
+        const btn = document.getElementById('copy-audit-btn');
+        if (btn) {
+            btn.innerHTML = '<span>✅</span> Log Copied!';
+            setTimeout(() => {
+                btn.innerHTML = '<span>📋</span> Copy Audit Log to Clipboard';
+            }, 3000);
+        }
+    } catch (err) {
+        console.error('Copy failed', err);
+        showToast('Failed to copy. Please try again.', 'danger');
+    }
 }
 
 // =============================================
