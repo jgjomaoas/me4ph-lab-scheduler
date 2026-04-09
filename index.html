@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css?v=5">
 </head>
 
 <body class="dark-theme">
@@ -37,6 +37,10 @@
                         <span class="icon">🧪</span>
                         <span class="label">Reagents</span>
                     </li>
+                    <li class="nav-item" id="nav-supplies">
+                        <span class="icon">📦</span>
+                        <span class="label">Supplies &amp; Materials</span>
+                    </li>
                     <li class="nav-item" id="nav-maintenance">
                         <span class="icon">🛠️</span>
                         <span class="label">Under Maintenance</span>
@@ -60,7 +64,7 @@
                 </div>
                 <div class="header-right">
                     <div class="time-container">
-                        <div class="time-display" id="digital-clock">07:03:15 AM</div>
+                        <div class="time-display" id="digital-clock">03:55:00 PM</div>
                         <button class="header-theme-toggle" id="header-theme-toggle" title="Toggle Laboratory Theme">
                             <span class="icon">🌙</span>
                             <span class="label">Midnight Mode</span>
@@ -75,8 +79,8 @@
                     <div class="protocol-alert glass">
                         <div class="alert-icon">⚠️</div>
                         <div class="alert-content">
-                            <h3>Active Protocol: Standard Hours (08:00 - 17:00)</h3>
-                            <p>Laboratory usage after <strong>17:00 PHT</strong> requires a supervisor present and a
+                            <h3>Active Protocol: Standard Hours (8:00 AM - 5:00 PM)</h3>
+                            <p>Laboratory usage after <strong>5:00 PM PHT</strong> requires a supervisor present and a
                                 valid Overtime (OT) Permit.</p>
                         </div>
                     </div>
@@ -133,12 +137,23 @@
                 <div id="reagents-view" class="hidden">
                     <div class="view-header">
                         <div class="header-content">
-                            <h2>Chemicals & Reagents</h2>
+                            <h2>Chemicals &amp; Reagents</h2>
                             <p class="subtitle">Stock levels of buffers, chemicals, and laboratory reagents.</p>
                         </div>
                         <button class="btn btn-primary" id="add-reagent-btn">+ Log New Reagent</button>
                     </div>
                     <div class="maintenance-grid" id="reagents-grid"></div>
+                </div>
+
+                <div id="supplies-view" class="hidden">
+                    <div class="view-header">
+                        <div class="header-content">
+                            <h2>Supplies &amp; Materials</h2>
+                            <p class="subtitle">Manage lab consumables, tools, hardware, and safety items.</p>
+                        </div>
+                        <button class="btn btn-primary" id="add-supply-btn">+ Add Supply</button>
+                    </div>
+                    <div class="maintenance-grid" id="supplies-grid"></div>
                 </div>
 
                 <div id="maintenance-view" class="hidden">
@@ -159,7 +174,7 @@
         </main>
     </div>
 
-    <!-- Booking Modal (Updated for Flexible Resources) -->
+    <!-- Booking Modal -->
     <div id="booking-modal" class="modal-overlay">
         <div class="modal-content glass">
             <header class="modal-header">
@@ -182,18 +197,22 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="start-time">Start Time</label>
-                        <input type="time" id="start-time" required>
+                        <label>Time In</label>
+                        <div class="time-picker" id="start-time-picker">
+                            <!-- JS builds the dropdowns here -->
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="end-time">End Time</label>
-                        <input type="time" id="end-time" required>
+                        <label>Time Out</label>
+                        <div class="time-picker" id="end-time-picker">
+                            <!-- JS builds the dropdowns here -->
+                        </div>
                     </div>
                 </div>
-                <!-- OT Protocol Reminder (Internal Alert) -->
+                <!-- OT Protocol Reminder -->
                 <div id="ot-warning" class="ot-warning hidden">
                     <p>⚠️ <strong>OT Protocol Required</strong>: Your requested time extends beyond standard hours.
-                        Please ensures a supervisor is present and you possess a valid OT permit.</p>
+                        Please ensure a supervisor is present and you possess a valid OT permit.</p>
                 </div>
                 <div class="form-group">
                     <label for="experiment-note">Purpose of Use</label>
@@ -206,7 +225,6 @@
             </form>
         </div>
     </div>
-
 
     <!-- Media Logging Modal -->
     <div id="media-modal" class="modal-overlay">
@@ -304,6 +322,52 @@
         </div>
     </div>
 
+    <!-- Supplies & Materials Modal -->
+    <div id="supplies-modal" class="modal-overlay">
+        <div class="modal-content glass">
+            <header class="modal-header">
+                <h2>Add Supply / Material</h2>
+                <button class="close-btn" id="close-supplies-modal">&times;</button>
+            </header>
+            <form id="supplies-form">
+                <div class="form-group">
+                    <label for="supply-name">Item Name / Description</label>
+                    <input type="text" id="supply-name" placeholder="e.g. Nitrile Gloves (Medium)" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="supply-category">Category</label>
+                        <select id="supply-category">
+                            <option value="Consumables">Consumables</option>
+                            <option value="Hardware">Hardware</option>
+                            <option value="Tools">Tools</option>
+                            <option value="Safety">Safety</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="supply-quantity">Quantity / Unit</label>
+                        <input type="text" id="supply-quantity" placeholder="e.g. 100 pcs, 5 L">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="supply-unit-cost">Unit Cost (&#8369;)</label>
+                        <input type="number" id="supply-unit-cost" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="supply-supplier">Supplier Name</label>
+                        <input type="text" id="supply-supplier" placeholder="e.g. Lab Depot PH">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-supply">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add to Inventory</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Maintenance Request Modal -->
     <div id="maintenance-modal" class="modal-overlay">
         <div class="modal-content glass">
@@ -339,7 +403,8 @@
                 </div>
                 <div class="form-group">
                     <label for="maint-supplier">Supplier / Maintenance Provider</label>
-                    <input type="text" id="maint-supplier" placeholder="e.g. Thermo Fisher, Agilent, Internal" required>
+                    <input type="text" id="maint-supplier" placeholder="e.g. Thermo Fisher, Agilent, Internal"
+                        required>
                 </div>
                 <div class="form-group">
                     <label for="maint-notes">Technical Notes</label>
@@ -375,7 +440,7 @@
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=2"></script>
+    <script src="app.js?v=5"></script>
 </body>
 
 </html>
