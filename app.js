@@ -589,6 +589,8 @@ function setupEventListeners() {
             mediaForm.reset();
             showToast('Media Inventory Updated');
             updateStatus('Synced', 'success');
+            // Explicitly refresh state and UI
+            fetchFullState().then(() => renderInventory('media'));
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -613,6 +615,8 @@ function setupEventListeners() {
             reagentsForm.reset();
             showToast('Reagent Logged Successfully');
             updateStatus('Synced', 'success');
+            // Explicitly refresh state and UI
+            fetchFullState().then(() => renderInventory('reagents'));
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -637,6 +641,8 @@ function setupEventListeners() {
             suppliesForm.reset();
             showToast('Supply Catalog Updated');
             updateStatus('Synced', 'success');
+            // Explicitly refresh state and UI
+            fetchFullState().then(() => renderSupplies());
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -661,6 +667,8 @@ function setupEventListeners() {
             maintenanceForm.reset();
             showToast('System Diagnostics Updated');
             updateStatus('Synced', 'success');
+            // Explicitly refresh state and UI
+            fetchFullState().then(() => renderMaintenance());
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -751,6 +759,10 @@ function setupEventListeners() {
             updateStatus('Synced', 'success');
             bookingModal.classList.remove('active');
             bookingForm.reset();
+            // Explicitly refresh state and UI
+            fetchFullState().then(() => {
+                renderCalendar();
+            });
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
