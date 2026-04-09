@@ -1118,34 +1118,7 @@ function processReportData(start, end) {
     }
 }
 
-/**
- * Generates and downloads a CSV audit log.
- */
-function downloadReportsCSV() {
-    const data = window.currentReportData;
-    if (!data || data.length === 0) {
-        showToast('No data available to export for this period', 'warning');
-        return;
-    }
 
-    // CSV Headers
-    const headers = ['Date', 'Student', 'Resource', 'Time In', 'Time Out', 'Purpose'];
-    
-    // Prepare rows
-    const csvRows = [
-        headers.join(','),
-        ...data.map(b => {
-            const row = [
-                b.date_key,
-                b.user_name,
-                b.resource,
-                formatTo12Hr(b.start_time),
-                formatTo12Hr(b.end_time),
-                (b.notes || '').replace(/"/g, '""').replace(/,/g, ';')
-            ];
-            return row.map(val => `"${val}"`).join(',');
-        })
-    ];
 
 /**
  * Generates the report text and copies it instantly to the clipboard.
