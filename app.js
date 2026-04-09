@@ -21,7 +21,7 @@ let state = {
     maintenance: [
         { name: "Confocal Microscope", icon: "🔬", status: "online", notes: "Calibration completed [2026-04-05]", supplier: "Leica Microsystems" },
         { name: "PCR Thermal Cycler", icon: "🧬", status: "online", notes: "Stable performance detected.", supplier: "Bio-Rad" },
-        { name: "Mass Spectrometer v2", icon: "⚗️", status: "offline", notes: "Vacuum pump maintenance in progress.", supplier: "Waters Corp", eta: "Tomorrow 09:00" },
+        { name: "Mass Spectrometer v2", icon: "⚗️", status: "offline", notes: "Vacuum pump maintenance in progress.", supplier: "Waters Corp", eta: "Tomorrow 09:00 AM" },
         { name: "Ultra-Low Freezer", icon: "❄️", status: "online", notes: "Temperature: -80.2°C [Nominal]", supplier: "Eppendorf" }
     ],
     media: [
@@ -51,7 +51,7 @@ const maintenanceGrid = document.getElementById('maintenance-grid');
 const confirmModal = document.getElementById('confirm-modal');
 const toastContainer = document.getElementById('toast-container');
 
-// New Inventory Elements
+// Inventory Elements
 const mediaGrid = document.getElementById('media-grid');
 const reagentsGrid = document.getElementById('reagents-grid');
 const suppliesGrid = document.getElementById('supplies-grid');
@@ -62,34 +62,62 @@ const mediaForm = document.getElementById('media-form');
 const reagentsForm = document.getElementById('reagents-form');
 const suppliesForm = document.getElementById('supplies-form');
 
-// --- Utilities ---
+let pendingDeleteId = null;
+let pendingDeleteCategory = null;
+let pendingDeleteDateKey = null;
+
+// =============================================
+// --- UTILITY FUNCTIONS ---
+// =============================================
+
+/**
+ * Converts a 24-hour "HH:MM" string to 12-hour "H:MM AM/PM" format.
+ */
 function formatTo12Hr(time24) {
-    if (!time24) return "";
+    if (!time24) return '';
     const [hours, minutes] = time24.split(':');
-    const h = parseInt(hours);
+    const h = parseInt(hours, 10);
     const ampm = h >= 12 ? 'PM' : 'AM';
     const h12 = h % 12 || 12;
     return `${h12}:${minutes} ${ampm}`;
 }
 
-function initTimePicker(containerId, initialTime = "08:00") {
+/**
+ * Formats a Date object into a "YYYY-MM-DD" key string.
+ */
+function formatDateKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+/**
+ * Builds a custom time-picker (Hour / Min / AM-PM selects) inside a container element.
+ */
+function initTimePicker(containerId, initialTime = '08:00') {
     const container = document.getElementById(containerId);
     if (!container) return;
 
     const [initH, initM] = initialTime.split(':');
-    const h = parseInt(initH);
-    const m = initM;
+    const h = parseInt(initH, 10);
     const ampm = h >= 12 ? 'PM' : 'AM';
     const h12 = h % 12 || 12;
 
+    const hourOptions = Array.from({ length: 12 }, (_, i) => {
+        const val = i + 1;
+        return `<option value="${val}" ${h12 === val ? 'selected' : ''}>${val}</option>`;
+    }).join('');
+
+    const minOptions = Array.from({ length: 60 }, (_, i) => {
+        const val = String(i).padStart(2, '0');
+        return `<option value="${val}" ${initM === val ? 'selected' : ''}>${val}</option>`;
+    }).join('');
+
     container.innerHTML = `
-        <select class="tp-input tp-hour">
-            ${Array.from({length: 12}, (_, i) => `<option value="${i+1}" ${h12 === i+1 ? 'selected' : ''}>${i+1}</option>`).join('')}
-        </select>
-        <span>:</span>
-        <select class="tp-input tp-min">
-            ${Array.from({length: 60}, (_, i) => `<option value="${String(i).padStart(2, '0')}" ${m === String(i).padStart(2, '0') ? 'selected' : ''}>${String(i).padStart(2, '0')}</option>`).join('')}
-        </select>
+        <select class="tp-input tp-hour">${hourOptions}</select>
+        <span style="font-weight:700; color:var(--accent);">:</span>
+        <select class="tp-input tp-min">${minOptions}</select>
         <select class="tp-input tp-ampm">
             <option value="AM" ${ampm === 'AM' ? 'selected' : ''}>AM</option>
             <option value="PM" ${ampm === 'PM' ? 'selected' : ''}>PM</option>
@@ -97,10 +125,14 @@ function initTimePicker(containerId, initialTime = "08:00") {
     `;
 }
 
+/**
+ * Reads the current value from a custom time-picker and returns a 24-hour "HH:MM" string.
+ */
 function getTimePickerValue(containerId) {
     const container = document.getElementById(containerId);
-    if (!container) return "00:00";
-    let h = parseInt(container.querySelector('.tp-hour').value);
+    if (!container) return '00:00';
+
+    let h = parseInt(container.querySelector('.tp-hour').value, 10);
     const m = container.querySelector('.tp-min').value;
     const ampm = container.querySelector('.tp-ampm').value;
 
@@ -110,9 +142,9 @@ function getTimePickerValue(containerId) {
     return `${String(h).padStart(2, '0')}:${m}`;
 }
 
-let pendingDeleteId = null;
-let pendingDeleteCategory = null; // 'maintenance', 'media', 'reagents', 'booking'
-let pendingDeleteDateKey = null; // for bookings
+// =============================================
+// --- CORE INIT & CLOCK ---
+// =============================================
 
 async function init() {
     updateStatus('Connecting...', 'warning');
@@ -129,11 +161,12 @@ async function init() {
     renderMaintenance();
     renderInventory('media');
     renderInventory('reagents');
-    renderInventory('supplies');
+    renderSupplies();
     updateClock();
     setInterval(updateClock, 1000);
     setupEventListeners();
     setupRealtimeSubscriptions();
+    // Initialize time pickers after DOM is fully ready
     initTimePicker('start-time-picker', '08:00');
     initTimePicker('end-time-picker', '17:00');
 }
@@ -151,7 +184,6 @@ function applyTheme(theme) {
     state.theme = theme;
     document.body.classList.toggle('light-theme', theme === 'light');
 
-    // Update Header Toggle UI
     const toggleBtn = document.getElementById('header-theme-toggle');
     if (toggleBtn) {
         const icon = toggleBtn.querySelector('.icon');
@@ -172,41 +204,93 @@ function updateClock() {
     clockDisplay.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 }
 
+// =============================================
+// --- CALENDAR & AGENDA RENDERING ---
+// =============================================
+
+function renderCalendar() {
+    const year = state.currentDate.getFullYear();
+    const month = state.currentDate.getMonth();
+
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+    monthYearDisplay.textContent = `${monthNames[month]} ${year}`;
+    calendarGrid.innerHTML = '';
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // Empty cells for alignment
+    for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'day-cell empty';
+        calendarGrid.appendChild(emptyCell);
     }
+
+    // Day cells
+    const today = new Date();
+    const todayKey = formatDateKey(today);
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const cellDate = new Date(year, month, day);
+        const dateKey = formatDateKey(cellDate);
+
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+        if (dateKey === todayKey) cell.classList.add('today');
+
+        cell.innerHTML = `
+            <span class="day-number">${day}</span>
+            <div class="day-events" id="events-${dateKey}"></div>
+        `;
+
+        cell.addEventListener('click', () => openBookingModal(cellDate));
+        calendarGrid.appendChild(cell);
+        renderEventsForDay(dateKey);
+    }
+
     renderAgenda(todayKey);
 }
 
+/**
+ * Renders the agenda panel for a given date.
+ * Past entries are displayed with a "locked" style and no delete button.
+ * Present/future entries show the delete button.
+ */
 function renderAgenda(dateKey) {
     const agendaList = document.getElementById('agenda-list');
     const agendaDateLabel = document.getElementById('agenda-date-label');
     if (!agendaList) return;
 
     const dayBookings = state.bookings[dateKey] || [];
+
+    // Determine if this date is in the past (before today's midnight)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const targetDate = new Date(dateKey);
+    const targetDate = new Date(dateKey + 'T00:00:00');
     const isPast = targetDate < today;
 
     // Format label
-    const dateObj = new Date(dateKey);
-    agendaDateLabel.textContent = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    agendaDateLabel.textContent = targetDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
     if (dayBookings.length === 0) {
         agendaList.innerHTML = `<div class="empty-agenda">No reservations for ${dateKey === formatDateKey(new Date()) ? 'today' : 'this date'}.</div>`;
         return;
     }
 
-    // Sort by start time
     const sorted = [...dayBookings].sort((a, b) => a.start_time.localeCompare(b.start_time));
 
     agendaList.innerHTML = '';
     sorted.forEach((booking) => {
         const item = document.createElement('div');
-        item.className = `agenda-item ${isPast ? 'locked-entry' : ''}`;
+        item.className = `agenda-item${isPast ? ' locked-entry' : ''}`;
 
         item.innerHTML = `
-            ${!isPast ? `<button class="remove-btn" data-category="booking" data-id="${booking.id}" data-datekey="${dateKey}" title="Cancel Reservation">×</button>` : ''}
-            <span class="agenda-time">${formatTo12Hr(booking.start_time)} - ${formatTo12Hr(booking.end_time)}</span>
+            ${!isPast
+                ? `<button class="remove-btn" data-category="booking" data-id="${booking.id}" data-datekey="${dateKey}" title="Cancel Reservation">×</button>`
+                : `<span style="position:absolute;top:12px;right:12px;opacity:0.4;font-size:14px;" title="Historical records are locked">🔒</span>`
+            }
+            <span class="agenda-time">${formatTo12Hr(booking.start_time)} – ${formatTo12Hr(booking.end_time)}</span>
             <span class="agenda-resource">${booking.resource}</span>
             <span class="agenda-user">${booking.user_name}</span>
         `;
@@ -214,17 +298,29 @@ function renderAgenda(dateKey) {
     });
 }
 
-async function removeBooking(id, dateKey) {
-    updateStatus('Syncing...', 'warning');
-    const { error } = await db.from('bookings').delete().eq('id', id);
-    if (!error) {
-        showToast('Reservation cancelled');
-        updateStatus('Synced', 'success');
-    } else {
-        console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
-        updateStatus('Error', 'red');
-    }
+function renderEventsForDay(dateKey) {
+    const eventContainer = document.getElementById(`events-${dateKey}`);
+    if (!eventContainer || !state.bookings[dateKey]) return;
+
+    eventContainer.innerHTML = '';
+    state.bookings[dateKey].forEach(booking => {
+        const pill = document.createElement('div');
+        pill.className = 'event-pill';
+        pill.textContent = `${formatTo12Hr(booking.start_time)} | ${booking.user_name}`;
+        pill.title = `${booking.user_name} — ${booking.resource} | ${formatTo12Hr(booking.start_time)} to ${formatTo12Hr(booking.end_time)}`;
+        eventContainer.appendChild(pill);
+    });
 }
+
+function openBookingModal(date) {
+    state.selectedDate = date;
+    dateDisplay.value = date.toDateString();
+    bookingModal.classList.add('active');
+}
+
+// =============================================
+// --- MAINTENANCE & INVENTORY RENDERING ---
+// =============================================
 
 function renderMaintenance() {
     if (!maintenanceGrid) return;
@@ -254,6 +350,9 @@ function renderMaintenance() {
     });
 }
 
+/**
+ * Renders Media and Reagents inventory cards (items with a "status" field).
+ */
 function renderInventory(category) {
     const grid = document.getElementById(`${category}-grid`);
     if (!grid) return;
@@ -261,25 +360,81 @@ function renderInventory(category) {
 
     state[category].forEach((item) => {
         const card = document.createElement('div');
-        const statusClass = item.status.toLowerCase().replace(/ /g, '-');
+        const statusClass = (item.status || 'unknown').toLowerCase().replace(/ /g, '-');
         card.className = `status-card glass inventory-card ${statusClass}`;
 
         card.innerHTML = `
             <div class="status-header">
-                <span class="status-tag tag-${statusClass}">${item.status}</span>
+                <span class="status-tag tag-${statusClass}">${item.status || 'N/A'}</span>
                 <div class="header-actions">
-                    <span class="equipment-icon">${item.icon}</span>
+                    <span class="equipment-icon">${item.icon || '📦'}</span>
                     <button class="remove-btn" data-category="${category}" data-id="${item.id}" title="Remove Item">×</button>
                 </div>
             </div>
             <h3>${item.name}</h3>
             <p class="supplier-text"><strong>Supplier:</strong> ${item.supplier || 'Not Specified'}</p>
-            ${category === 'supplies' ? `<p class="unit-cost">&#8369; ${item.unit_cost || '0.00'}</p>` : ''}
-            <p class="notes-text">${item.notes || item.quantity || ''}</p>
+            <p class="notes-text">${item.notes || ''}</p>
         `;
         grid.appendChild(card);
     });
 }
+
+/**
+ * Renders the Supplies & Materials inventory cards (separate from inventory as they have different fields).
+ */
+function renderSupplies() {
+    const grid = document.getElementById('supplies-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (state.supplies.length === 0) {
+        grid.innerHTML = `<div style="color:var(--text-secondary);font-size:14px;padding:20px;">No supply items logged yet. Click "+ Add Supply" to get started.</div>`;
+        return;
+    }
+
+    const categoryIconMap = {
+        'Consumables': '🧤',
+        'Hardware': '🔧',
+        'Tools': '🛠️',
+        'Safety': '🦺',
+        'Other': '📦'
+    };
+    const categoryClassMap = {
+        'Consumables': 'tag-consumables',
+        'Hardware': 'tag-hardware',
+        'Tools': 'tag-tools',
+        'Safety': 'tag-safety',
+        'Other': 'tag-in-stock'
+    };
+
+    state.supplies.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'status-card glass inventory-card';
+
+        const icon = categoryIconMap[item.category] || '📦';
+        const tagClass = categoryClassMap[item.category] || 'tag-in-stock';
+        const cost = item.unit_cost ? `₱${parseFloat(item.unit_cost).toFixed(2)}` : '—';
+
+        card.innerHTML = `
+            <div class="status-header">
+                <span class="status-tag ${tagClass}">${item.category || 'General'}</span>
+                <div class="header-actions">
+                    <span class="equipment-icon">${icon}</span>
+                    <button class="remove-btn" data-category="supplies" data-id="${item.id}" title="Remove Item">×</button>
+                </div>
+            </div>
+            <h3>${item.name}</h3>
+            <p class="supplier-text"><strong>Supplier:</strong> ${item.supplier || 'Not Specified'}</p>
+            <p class="notes-text"><strong>Qty:</strong> ${item.quantity || '—'}</p>
+            <p class="unit-cost">Unit Cost: ${cost}</p>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// =============================================
+// --- DELETION HELPERS ---
+// =============================================
 
 function removeMaintenance(id) {
     const item = state.maintenance.find(i => i.id === id);
@@ -292,12 +447,12 @@ function removeMaintenance(id) {
 }
 
 function removeInventory(category, id) {
-    const item = state[category].find(i => i.id === id);
+    const item = state[category] ? state[category].find(i => i.id === id) : null;
     if (!item) return;
     pendingDeleteId = id;
     pendingDeleteCategory = category;
     const msg = document.getElementById('confirm-message');
-    msg.textContent = `Are you sure you want to remove ${item.name} from ${category}?`;
+    msg.textContent = `Are you sure you want to remove "${item.name}" from ${category}?`;
     confirmModal.classList.add('active');
 }
 
@@ -310,9 +465,13 @@ function removeBookingUI(dateKey, id) {
     pendingDeleteCategory = 'booking';
 
     const msg = document.getElementById('confirm-message');
-    msg.textContent = `Are you sure you want to cancel the reservation for ${booking.resource} on ${dateKey}?`;
+    msg.textContent = `Are you sure you want to cancel the reservation for "${booking.resource}" on ${dateKey}?`;
     confirmModal.classList.add('active');
 }
+
+// =============================================
+// --- TOAST NOTIFICATIONS ---
+// =============================================
 
 function showToast(message, type = 'success') {
     if (!toastContainer) return;
@@ -327,35 +486,27 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-function renderEventsForDay(dateKey) {
-    const eventContainer = document.getElementById(`events-${dateKey}`);
-    if (!eventContainer || !state.bookings[dateKey]) return;
+// =============================================
+// --- OT REQUIREMENT CHECK ---
+// =============================================
 
-    eventContainer.innerHTML = '';
-    state.bookings[dateKey].forEach(booking => {
-        const pill = document.createElement('div');
-        pill.className = 'event-pill';
-        // Display [Time] Name - Resource
-        pill.textContent = `${formatTo12Hr(booking.start_time)} | ${booking.user_name}`;
-        pill.title = `${booking.user_name} reserved ${booking.resource} from ${formatTo12Hr(booking.start_time)} to ${formatTo12Hr(booking.end_time)}`;
-        eventContainer.appendChild(pill);
-    });
+function checkOTRequirement() {
+    const startTime = getTimePickerValue('start-time-picker');
+    const endTime = getTimePickerValue('end-time-picker');
+    const otWarning = document.getElementById('ot-warning');
+
+    if (!otWarning) return;
+
+    const isOT = startTime >= '17:00' || (endTime > '17:00' || (endTime < '08:00' && endTime !== ''));
+    otWarning.classList.toggle('hidden', !isOT);
 }
 
-function openBookingModal(date) {
-    state.selectedDate = date;
-    dateDisplay.value = date.toDateString();
-    bookingModal.classList.add('active');
-}
-
-function formatDateKey(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
+// =============================================
+// --- EVENT LISTENERS ---
+// =============================================
 
 function setupEventListeners() {
+    // Calendar Navigation
     document.getElementById('prev-month').addEventListener('click', () => {
         state.currentDate.setMonth(state.currentDate.getMonth() - 1);
         renderCalendar();
@@ -366,55 +517,50 @@ function setupEventListeners() {
         renderCalendar();
     });
 
-    // Navigation Switching
-    const navDashboard = document.getElementById('nav-dashboard');
-    const navMaintenance = document.getElementById('nav-maintenance');
-    const scheduleView = document.getElementById('schedule-view');
-    const maintenanceView = document.getElementById('maintenance-view');
-    const pageTitle = document.getElementById('page-title');
-
-    // Centralized Navigation Switching
+    // Sidebar Navigation
     const navItems = {
-        'nav-dashboard': { view: 'schedule-view', title: 'Laboratory Timeline' },
-        'nav-media': { view: 'media-view', title: 'Media Inventory', render: () => renderInventory('media') },
-        'nav-reagents': { view: 'reagents-view', title: 'Chemicals & Reagents', render: () => renderInventory('reagents') },
-        'nav-supplies': { view: 'supplies-view', title: 'Supplies & Materials', render: () => renderInventory('supplies') },
-        'nav-maintenance': { view: 'maintenance-view', title: 'Hardware Diagnostics', render: () => renderMaintenance() }
+        'nav-dashboard':   { view: 'schedule-view',    title: 'Laboratory Timeline' },
+        'nav-media':       { view: 'media-view',        title: 'Media Inventory',         render: () => renderInventory('media') },
+        'nav-reagents':    { view: 'reagents-view',     title: 'Chemicals & Reagents',     render: () => renderInventory('reagents') },
+        'nav-supplies':    { view: 'supplies-view',     title: 'Supplies & Materials',     render: () => renderSupplies() },
+        'nav-maintenance': { view: 'maintenance-view',  title: 'Hardware Diagnostics',     render: () => renderMaintenance() }
     };
 
     Object.keys(navItems).forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) {
-            btn.addEventListener('click', () => {
-                // Update UI state
-                Object.keys(navItems).forEach(key => {
-                    document.getElementById(key).classList.remove('active');
-                    document.getElementById(navItems[key].view).classList.add('hidden');
-                });
-
-                btn.classList.add('active');
-                document.getElementById(navItems[id].view).classList.remove('hidden');
-                document.getElementById('page-title').textContent = navItems[id].title;
-                if (navItems[id].render) navItems[id].render();
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            Object.keys(navItems).forEach(key => {
+                const el = document.getElementById(key);
+                if (el) el.classList.remove('active');
+                const viewEl = document.getElementById(navItems[key].view);
+                if (viewEl) viewEl.classList.add('hidden');
             });
-        }
+
+            btn.classList.add('active');
+            document.getElementById(navItems[id].view).classList.remove('hidden');
+            document.getElementById('page-title').textContent = navItems[id].title;
+            if (navItems[id].render) navItems[id].render();
+        });
     });
 
-    // Modal Listeners
+    // Modal Helper
     const setupModal = (btnId, modalId, closeId, cancelId) => {
         const btn = document.getElementById(btnId);
         const modal = document.getElementById(modalId);
-        if (btn) btn.addEventListener('click', () => modal.classList.add('active'));
-        if (document.getElementById(closeId)) document.getElementById(closeId).addEventListener('click', () => modal.classList.remove('active'));
-        if (document.getElementById(cancelId)) document.getElementById(cancelId).addEventListener('click', () => modal.classList.remove('active'));
+        if (btn && modal) btn.addEventListener('click', () => modal.classList.add('active'));
+        const closeEl = document.getElementById(closeId);
+        const cancelEl = document.getElementById(cancelId);
+        if (closeEl && modal) closeEl.addEventListener('click', () => modal.classList.remove('active'));
+        if (cancelEl && modal) cancelEl.addEventListener('click', () => modal.classList.remove('active'));
     };
 
-    setupModal('add-media-btn', 'media-modal', 'close-media-modal', 'cancel-media');
-    setupModal('add-reagent-btn', 'reagents-modal', 'close-reagents-modal', 'cancel-reagent');
-    setupModal('add-supply-btn', 'supplies-modal', 'close-supplies-modal', 'cancel-supply');
+    setupModal('add-media-btn',    'media-modal',       'close-media-modal',       'cancel-media');
+    setupModal('add-reagent-btn',  'reagents-modal',    'close-reagents-modal',    'cancel-reagent');
+    setupModal('add-supply-btn',   'supplies-modal',    'close-supplies-modal',    'cancel-supply');
     setupModal('report-issue-btn', 'maintenance-modal', 'close-maintenance-modal', 'cancel-maintenance');
 
-    // Theme Toggle Listener (Header Wrapper)
+    // Theme Toggle
     const headerToggle = document.getElementById('header-theme-toggle');
     if (headerToggle) {
         headerToggle.addEventListener('click', () => {
@@ -424,7 +570,9 @@ function setupEventListeners() {
         });
     }
 
-    // Form Submissions
+    // --- Form Submissions ---
+
+    // Media Form
     mediaForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         updateStatus('Syncing...', 'warning');
@@ -442,14 +590,37 @@ function setupEventListeners() {
             showToast('Media Inventory Updated');
             updateStatus('Synced', 'success');
         } else {
-            console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
+            console.error('Supabase error:', JSON.stringify(error));
+            showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
             updateStatus('Error', 'red');
         }
     });
 
+    // Reagents Form
+    reagentsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        updateStatus('Syncing...', 'warning');
+        const newItem = {
+            name: document.getElementById('reagent-name').value,
+            icon: document.getElementById('reagent-icon').value,
+            status: document.getElementById('reagent-status').value,
+            supplier: document.getElementById('reagent-supplier').value,
+            notes: document.getElementById('reagent-notes').value
+        };
+        const { error } = await db.from('reagents').insert([newItem]);
+        if (!error) {
+            reagentsModal.classList.remove('active');
+            reagentsForm.reset();
+            showToast('Reagent Logged Successfully');
+            updateStatus('Synced', 'success');
+        } else {
+            console.error('Supabase error:', JSON.stringify(error));
+            showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
+            updateStatus('Error', 'red');
         }
     });
 
+    // Supplies Form
     suppliesForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         updateStatus('Syncing...', 'warning');
@@ -467,11 +638,13 @@ function setupEventListeners() {
             showToast('Supply Catalog Updated');
             updateStatus('Synced', 'success');
         } else {
-            console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
+            console.error('Supabase error:', JSON.stringify(error));
+            showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
             updateStatus('Error', 'red');
         }
     });
 
+    // Maintenance Form
     maintenanceForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         updateStatus('Syncing...', 'warning');
@@ -489,12 +662,13 @@ function setupEventListeners() {
             showToast('System Diagnostics Updated');
             updateStatus('Synced', 'success');
         } else {
-            console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
+            console.error('Supabase error:', JSON.stringify(error));
+            showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
             updateStatus('Error', 'red');
         }
     });
 
-    // Global Event Delegation (for Deletion)
+    // --- Global Event Delegation (Deletion) ---
     document.addEventListener('click', (e) => {
         const removeBtn = e.target.closest('.remove-btn');
         if (removeBtn) {
@@ -512,7 +686,7 @@ function setupEventListeners() {
         }
     });
 
-    // Confirmation Modal Listeners
+    // Confirmation Modal
     document.getElementById('confirm-cancel').addEventListener('click', () => {
         confirmModal.classList.remove('active');
         pendingDeleteId = null;
@@ -530,7 +704,8 @@ function setupEventListeners() {
                 showToast('Item removed successfully');
                 updateStatus('Synced', 'success');
             } else {
-                console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
+                console.error('Supabase error:', JSON.stringify(error));
+                showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
                 updateStatus('Error', 'red');
             }
         }
@@ -540,16 +715,18 @@ function setupEventListeners() {
         pendingDeleteDateKey = null;
     });
 
+    // Booking Modal Close
     document.getElementById('close-modal').addEventListener('click', () => bookingModal.classList.remove('active'));
     document.getElementById('cancel-booking').addEventListener('click', () => bookingModal.classList.remove('active'));
 
-    // OT Requirement Check
+    // OT Check on time-picker change
     document.addEventListener('change', (e) => {
-        if (e.target.closest('.time-picker select')) {
+        if (e.target.closest('#start-time-picker, #end-time-picker')) {
             checkOTRequirement();
         }
     });
 
+    // Booking Form Submission
     bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         updateStatus('Syncing...', 'warning');
@@ -575,24 +752,16 @@ function setupEventListeners() {
             bookingModal.classList.remove('active');
             bookingForm.reset();
         } else {
-            console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
+            console.error('Supabase error:', JSON.stringify(error));
+            showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
             updateStatus('Error', 'red');
         }
     });
 }
 
-function checkOTRequirement() {
-    const startTime = getTimePickerValue('start-time-picker');
-    const endTime = getTimePickerValue('end-time-picker');
-    const otWarning = document.getElementById('ot-warning');
-
-    if (!startTime || !endTime || !otWarning) return;
-
-    // Check if any part of the session is after 17:00 (5:00 PM)
-    const isOT = startTime >= '17:00' || (endTime > '17:00' || (endTime < '08:00' && endTime !== ''));
-
-    otWarning.classList.toggle('hidden', !isOT);
-}
+// =============================================
+// --- SUPABASE DATA FETCHING ---
+// =============================================
 
 async function fetchFullState() {
     updateStatus('Fetching...', 'warning');
@@ -606,17 +775,18 @@ async function fetchFullState() {
         ]);
 
         state.bookings = {};
-        bookings.data.forEach(b => {
+        (bookings.data || []).forEach(b => {
             if (!state.bookings[b.date_key]) state.bookings[b.date_key] = [];
             state.bookings[b.date_key].push(b);
         });
-        state.maintenance = maintenance.data;
-        state.media = media.data;
-        state.reagents = reagents.data;
+        state.maintenance = maintenance.data || [];
+        state.media = media.data || [];
+        state.reagents = reagents.data || [];
         state.supplies = supplies.data || [];
 
-        updateStatus('Synced', 'success');
+        updateStatus('Cloud Sync: Active', 'success');
     } catch (err) {
+        console.error('fetchFullState error:', err);
         updateStatus('Offline', 'red');
         loadStateLocal();
     }
@@ -632,11 +802,15 @@ function setupRealtimeSubscriptions() {
                 renderMaintenance();
                 renderInventory('media');
                 renderInventory('reagents');
-                renderInventory('supplies');
+                renderSupplies();
             });
         })
         .subscribe();
 }
+
+// =============================================
+// --- LOCAL STORAGE ---
+// =============================================
 
 function saveStateLocal() {
     localStorage.setItem('me4ph_theme', state.theme);
@@ -647,4 +821,7 @@ function loadStateLocal() {
     if (savedTheme) state.theme = savedTheme;
 }
 
+// =============================================
+// --- BOOT ---
+// =============================================
 init();
