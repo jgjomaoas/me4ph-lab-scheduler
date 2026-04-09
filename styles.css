@@ -948,7 +948,13 @@ textarea { height: 100px; resize: none; }
     transition: var(--transition);
 }
 
-.agenda-item:hover {
+.agenda-item.locked-entry {
+    opacity: 0.7;
+    border-style: dashed;
+    cursor: default;
+}
+
+.agenda-item:hover:not(.locked-entry) {
     border-color: var(--accent);
     transform: translateX(4px);
     box-shadow: var(--shadow);
@@ -962,7 +968,7 @@ textarea { height: 100px; resize: none; }
     transition: var(--transition);
 }
 
-.agenda-item:hover .remove-btn {
+.agenda-item:hover:not(.locked-entry) .remove-btn {
     opacity: 1;
 }
 
@@ -986,4 +992,41 @@ textarea { height: 100px; resize: none; }
     font-size: 14px;
     color: var(--text-secondary);
     margin-top: 4px;
+}
+
+/* Custom Time Picker */
+.time-picker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.tp-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 8px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    text-align: center;
+}
+
+.tp-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+/* Supply Category Tags */
+.status-tag.tag-consumables { background: rgba(0, 210, 255, 0.15); color: #00d2ff; border-color: rgba(0, 210, 255, 0.3); }
+.status-tag.tag-hardware { background: rgba(139, 148, 158, 0.15); color: #8b949e; border-color: rgba(139, 148, 158, 0.3); }
+.status-tag.tag-tools { background: rgba(210, 153, 34, 0.15); color: #d29922; border-color: rgba(210, 153, 34, 0.3); }
+.status-tag.tag-safety { background: rgba(248, 81, 73, 0.15); color: #f85149; border-color: rgba(248, 81, 73, 0.3); }
+
+.unit-cost {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--success);
+    font-weight: 700;
+    font-size: 14px;
 }

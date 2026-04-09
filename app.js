@@ -32,6 +32,7 @@ let state = {
         { name: "PBS 10X", icon: "🧴", status: "In Stock", supplier: "Sigma-Aldrich", notes: "Store at room temp." },
         { name: "Trypsin-EDTA", icon: "🧪", status: "Low Stock", supplier: "Corning", notes: "Order more for next month." }
     ],
+    supplies: [],
     theme: 'dark'
 };
 
@@ -53,10 +54,61 @@ const toastContainer = document.getElementById('toast-container');
 // New Inventory Elements
 const mediaGrid = document.getElementById('media-grid');
 const reagentsGrid = document.getElementById('reagents-grid');
+const suppliesGrid = document.getElementById('supplies-grid');
 const mediaModal = document.getElementById('media-modal');
 const reagentsModal = document.getElementById('reagents-modal');
+const suppliesModal = document.getElementById('supplies-modal');
 const mediaForm = document.getElementById('media-form');
 const reagentsForm = document.getElementById('reagents-form');
+const suppliesForm = document.getElementById('supplies-form');
+
+// --- Utilities ---
+function formatTo12Hr(time24) {
+    if (!time24) return "";
+    const [hours, minutes] = time24.split(':');
+    const h = parseInt(hours);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${minutes} ${ampm}`;
+}
+
+function initTimePicker(containerId, initialTime = "08:00") {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const [initH, initM] = initialTime.split(':');
+    const h = parseInt(initH);
+    const m = initM;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+
+    container.innerHTML = `
+        <select class="tp-input tp-hour">
+            ${Array.from({length: 12}, (_, i) => `<option value="${i+1}" ${h12 === i+1 ? 'selected' : ''}>${i+1}</option>`).join('')}
+        </select>
+        <span>:</span>
+        <select class="tp-input tp-min">
+            ${Array.from({length: 60}, (_, i) => `<option value="${String(i).padStart(2, '0')}" ${m === String(i).padStart(2, '0') ? 'selected' : ''}>${String(i).padStart(2, '0')}</option>`).join('')}
+        </select>
+        <select class="tp-input tp-ampm">
+            <option value="AM" ${ampm === 'AM' ? 'selected' : ''}>AM</option>
+            <option value="PM" ${ampm === 'PM' ? 'selected' : ''}>PM</option>
+        </select>
+    `;
+}
+
+function getTimePickerValue(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return "00:00";
+    let h = parseInt(container.querySelector('.tp-hour').value);
+    const m = container.querySelector('.tp-min').value;
+    const ampm = container.querySelector('.tp-ampm').value;
+
+    if (ampm === 'PM' && h < 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+
+    return `${String(h).padStart(2, '0')}:${m}`;
+}
 
 let pendingDeleteId = null;
 let pendingDeleteCategory = null; // 'maintenance', 'media', 'reagents', 'booking'
@@ -77,10 +129,13 @@ async function init() {
     renderMaintenance();
     renderInventory('media');
     renderInventory('reagents');
+    renderInventory('supplies');
     updateClock();
     setInterval(updateClock, 1000);
     setupEventListeners();
     setupRealtimeSubscriptions();
+    initTimePicker('start-time-picker', '08:00');
+    initTimePicker('end-time-picker', '17:00');
 }
 
 function updateStatus(text, type = 'success') {
@@ -117,48 +172,6 @@ function updateClock() {
     clockDisplay.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 }
 
-function renderCalendar() {
-    const year = state.currentDate.getFullYear();
-    const month = state.currentDate.getMonth();
-
-    // Header Display
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    monthYearDisplay.textContent = `${monthNames[month]} ${year}`;
-
-    calendarGrid.innerHTML = '';
-
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    // Empty cells for alignment
-    for (let i = 0; i < firstDay; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'day-cell empty';
-        calendarGrid.appendChild(emptyCell);
-    }
-
-    // Day cells
-    const today = new Date();
-    const todayKey = formatDateKey(today);
-    for (let day = 1; day <= daysInMonth; day++) {
-        const cellDate = new Date(year, month, day);
-        const dateKey = formatDateKey(cellDate);
-
-        const cell = document.createElement('div');
-        cell.className = 'day-cell';
-        if (dateKey === todayKey) {
-            cell.classList.add('today');
-        }
-
-        cell.innerHTML = `
-            <span class="day-number">${day}</span>
-            <div class="day-events" id="events-${dateKey}"></div>
-        `;
-
-        cell.addEventListener('click', () => openBookingModal(cellDate));
-        calendarGrid.appendChild(cell);
-
-        renderEventsForDay(dateKey);
     }
     renderAgenda(todayKey);
 }
@@ -169,13 +182,17 @@ function renderAgenda(dateKey) {
     if (!agendaList) return;
 
     const dayBookings = state.bookings[dateKey] || [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const targetDate = new Date(dateKey);
+    const isPast = targetDate < today;
 
     // Format label
     const dateObj = new Date(dateKey);
     agendaDateLabel.textContent = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
     if (dayBookings.length === 0) {
-        agendaList.innerHTML = '<div class="empty-agenda">No reservations for today.</div>';
+        agendaList.innerHTML = `<div class="empty-agenda">No reservations for ${dateKey === formatDateKey(new Date()) ? 'today' : 'this date'}.</div>`;
         return;
     }
 
@@ -185,11 +202,11 @@ function renderAgenda(dateKey) {
     agendaList.innerHTML = '';
     sorted.forEach((booking) => {
         const item = document.createElement('div');
-        item.className = 'agenda-item';
+        item.className = `agenda-item ${isPast ? 'locked-entry' : ''}`;
 
         item.innerHTML = `
-            <button class="remove-btn" data-category="booking" data-id="${booking.id}" data-datekey="${dateKey}" title="Cancel Reservation">×</button>
-            <span class="agenda-time">${booking.start_time} - ${booking.end_time}</span>
+            ${!isPast ? `<button class="remove-btn" data-category="booking" data-id="${booking.id}" data-datekey="${dateKey}" title="Cancel Reservation">×</button>` : ''}
+            <span class="agenda-time">${formatTo12Hr(booking.start_time)} - ${formatTo12Hr(booking.end_time)}</span>
             <span class="agenda-resource">${booking.resource}</span>
             <span class="agenda-user">${booking.user_name}</span>
         `;
@@ -257,7 +274,8 @@ function renderInventory(category) {
             </div>
             <h3>${item.name}</h3>
             <p class="supplier-text"><strong>Supplier:</strong> ${item.supplier || 'Not Specified'}</p>
-            <p class="notes-text">${item.notes}</p>
+            ${category === 'supplies' ? `<p class="unit-cost">&#8369; ${item.unit_cost || '0.00'}</p>` : ''}
+            <p class="notes-text">${item.notes || item.quantity || ''}</p>
         `;
         grid.appendChild(card);
     });
@@ -318,8 +336,8 @@ function renderEventsForDay(dateKey) {
         const pill = document.createElement('div');
         pill.className = 'event-pill';
         // Display [Time] Name - Resource
-        pill.textContent = `${booking.start_time} | ${booking.user_name}`;
-        pill.title = `${booking.user_name} reserved ${booking.resource} from ${booking.start_time} to ${booking.end_time}`;
+        pill.textContent = `${formatTo12Hr(booking.start_time)} | ${booking.user_name}`;
+        pill.title = `${booking.user_name} reserved ${booking.resource} from ${formatTo12Hr(booking.start_time)} to ${formatTo12Hr(booking.end_time)}`;
         eventContainer.appendChild(pill);
     });
 }
@@ -360,6 +378,7 @@ function setupEventListeners() {
         'nav-dashboard': { view: 'schedule-view', title: 'Laboratory Timeline' },
         'nav-media': { view: 'media-view', title: 'Media Inventory', render: () => renderInventory('media') },
         'nav-reagents': { view: 'reagents-view', title: 'Chemicals & Reagents', render: () => renderInventory('reagents') },
+        'nav-supplies': { view: 'supplies-view', title: 'Supplies & Materials', render: () => renderInventory('supplies') },
         'nav-maintenance': { view: 'maintenance-view', title: 'Hardware Diagnostics', render: () => renderMaintenance() }
     };
 
@@ -392,6 +411,7 @@ function setupEventListeners() {
 
     setupModal('add-media-btn', 'media-modal', 'close-media-modal', 'cancel-media');
     setupModal('add-reagent-btn', 'reagents-modal', 'close-reagents-modal', 'cancel-reagent');
+    setupModal('add-supply-btn', 'supplies-modal', 'close-supplies-modal', 'cancel-supply');
     setupModal('report-issue-btn', 'maintenance-modal', 'close-maintenance-modal', 'cancel-maintenance');
 
     // Theme Toggle Listener (Header Wrapper)
@@ -427,21 +447,24 @@ function setupEventListeners() {
         }
     });
 
-    reagentsForm.addEventListener('submit', async (e) => {
+        }
+    });
+
+    suppliesForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         updateStatus('Syncing...', 'warning');
         const newItem = {
-            name: document.getElementById('reagent-name').value,
-            icon: document.getElementById('reagent-icon').value,
-            status: document.getElementById('reagent-status').value,
-            supplier: document.getElementById('reagent-supplier').value,
-            notes: document.getElementById('reagent-notes').value
+            name: document.getElementById('supply-name').value,
+            category: document.getElementById('supply-category').value,
+            quantity: document.getElementById('supply-quantity').value,
+            unit_cost: parseFloat(document.getElementById('supply-unit-cost').value) || 0,
+            supplier: document.getElementById('supply-supplier').value
         };
-        const { error } = await db.from('reagents').insert([newItem]);
+        const { error } = await db.from('supplies').insert([newItem]);
         if (!error) {
-            reagentsModal.classList.remove('active');
-            reagentsForm.reset();
-            showToast('Reagent Logged Successfully');
+            suppliesModal.classList.remove('active');
+            suppliesForm.reset();
+            showToast('Supply Catalog Updated');
             updateStatus('Synced', 'success');
         } else {
             console.error('Supabase error:', JSON.stringify(error)); showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -521,16 +544,19 @@ function setupEventListeners() {
     document.getElementById('cancel-booking').addEventListener('click', () => bookingModal.classList.remove('active'));
 
     // OT Requirement Check
-    document.getElementById('start-time').addEventListener('input', checkOTRequirement);
-    document.getElementById('end-time').addEventListener('input', checkOTRequirement);
+    document.addEventListener('change', (e) => {
+        if (e.target.closest('.time-picker select')) {
+            checkOTRequirement();
+        }
+    });
 
     bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         updateStatus('Syncing...', 'warning');
 
         const dateKey = formatDateKey(state.selectedDate);
-        const startTime = document.getElementById('start-time').value;
-        const endTime = document.getElementById('end-time').value;
+        const startTime = getTimePickerValue('start-time-picker');
+        const endTime = getTimePickerValue('end-time-picker');
         const studentName = document.getElementById('student-name').value;
         const resource = resourceInput.value;
 
@@ -556,8 +582,8 @@ function setupEventListeners() {
 }
 
 function checkOTRequirement() {
-    const startTime = document.getElementById('start-time').value;
-    const endTime = document.getElementById('end-time').value;
+    const startTime = getTimePickerValue('start-time-picker');
+    const endTime = getTimePickerValue('end-time-picker');
     const otWarning = document.getElementById('ot-warning');
 
     if (!startTime || !endTime || !otWarning) return;
@@ -571,11 +597,12 @@ function checkOTRequirement() {
 async function fetchFullState() {
     updateStatus('Fetching...', 'warning');
     try {
-        const [bookings, maintenance, media, reagents] = await Promise.all([
+        const [bookings, maintenance, media, reagents, supplies] = await Promise.all([
             db.from('bookings').select('*'),
             db.from('maintenance').select('*'),
             db.from('media').select('*'),
-            db.from('reagents').select('*')
+            db.from('reagents').select('*'),
+            db.from('supplies').select('*')
         ]);
 
         state.bookings = {};
@@ -586,6 +613,7 @@ async function fetchFullState() {
         state.maintenance = maintenance.data;
         state.media = media.data;
         state.reagents = reagents.data;
+        state.supplies = supplies.data || [];
 
         updateStatus('Synced', 'success');
     } catch (err) {
@@ -604,6 +632,7 @@ function setupRealtimeSubscriptions() {
                 renderMaintenance();
                 renderInventory('media');
                 renderInventory('reagents');
+                renderInventory('supplies');
             });
         })
         .subscribe();

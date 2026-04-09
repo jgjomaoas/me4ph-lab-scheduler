@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ME4PH Lab | Automated Scheduling Protocol</title>
-    <meta name="description" content="State-of-the-art laboratory equipment scheduling and protocol management system for ME4PH Lab.">
+    <meta name="description"
+        content="State-of-the-art laboratory equipment scheduling and protocol management system for ME4PH Lab.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css?v=2">
 </head>
+
 <body class="dark-theme">
     <div class="app-container">
         <!-- Sidebar Navigation -->
@@ -73,7 +76,8 @@
                         <div class="alert-icon">⚠️</div>
                         <div class="alert-content">
                             <h3>Active Protocol: Standard Hours (08:00 - 17:00)</h3>
-                            <p>Laboratory usage after <strong>17:00 PHT</strong> requires a supervisor present and a valid Overtime (OT) Permit.</p>
+                            <p>Laboratory usage after <strong>17:00 PHT</strong> requires a supervisor present and a
+                                valid Overtime (OT) Permit.</p>
                         </div>
                     </div>
 
@@ -85,11 +89,17 @@
                                 <h2 id="month-year-display">April 2026</h2>
                                 <button class="nav-btn" id="next-month">❯</button>
                             </div>
-                            
+
                             <div class="calendar-header">
-                                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                                <div>Sun</div>
+                                <div>Mon</div>
+                                <div>Tue</div>
+                                <div>Wed</div>
+                                <div>Thu</div>
+                                <div>Fri</div>
+                                <div>Sat</div>
                             </div>
-                            
+
                             <div class="calendar-grid" id="calendar-grid">
                                 <!-- JS will populate day-cells here -->
                             </div>
@@ -139,7 +149,7 @@
                         </div>
                         <button class="btn btn-primary" id="report-issue-btn">+ Report Issue</button>
                     </div>
-                    
+
                     <div class="maintenance-grid" id="maintenance-grid">
                         <!-- JS will populate status-cards here -->
                     </div>
@@ -167,7 +177,8 @@
                 </div>
                 <div class="form-group">
                     <label for="resource-input">Equipment / Bench Space</label>
-                    <input type="text" id="resource-input" placeholder="e.g. PCR Machine, Bench 4, Flow Cytometer" required>
+                    <input type="text" id="resource-input" placeholder="e.g. PCR Machine, Bench 4, Flow Cytometer"
+                        required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -181,7 +192,8 @@
                 </div>
                 <!-- OT Protocol Reminder (Internal Alert) -->
                 <div id="ot-warning" class="ot-warning hidden">
-                    <p>⚠️ <strong>OT Protocol Required</strong>: Your requested time extends beyond standard hours. Please ensures a supervisor is present and you possess a valid OT permit.</p>
+                    <p>⚠️ <strong>OT Protocol Required</strong>: Your requested time extends beyond standard hours.
+                        Please ensures a supervisor is present and you possess a valid OT permit.</p>
                 </div>
                 <div class="form-group">
                     <label for="experiment-note">Purpose of Use</label>
@@ -234,7 +246,8 @@
                 </div>
                 <div class="form-group">
                     <label for="media-notes">Batch / Expiry / Notes</label>
-                    <textarea id="media-notes" placeholder="Batch number or special handling instructions..."></textarea>
+                    <textarea id="media-notes"
+                        placeholder="Batch number or special handling instructions..."></textarea>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-media">Cancel</button>
@@ -330,7 +343,8 @@
                 </div>
                 <div class="form-group">
                     <label for="maint-notes">Technical Notes</label>
-                    <textarea id="maint-notes" placeholder="Describe the current status or reported issue..."></textarea>
+                    <textarea id="maint-notes"
+                        placeholder="Describe the current status or reported issue..."></textarea>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-maintenance">Cancel</button>
@@ -363,4 +377,5 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js?v=2"></script>
 </body>
+
 </html>
