@@ -2,7 +2,7 @@
 
 // Supabase Configuration
 const SUPABASE_URL = 'https://mjwcvjbwzhdlmwqbcaju.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qd2N2amJ3emhkbG13cWJjYWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODU1MzQsImV4cCI6MjA5MTI2MTUzNH0.lmiAWkaAyqe1kG3-npTN7k2mu1Qbk7yEAU3P3MFXNIgjIeXZu8vwg_ieNiI_9R';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qd2N2amJ3emhkbG13cWJjYWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODU1MzQsImV4cCI6MjA5MTI2MTUzNH0.lmiAWkaAyqe1kG3-npTN7k2mu1Qbk7yEAU3P3MFXNIg';
 
 // Initialize Supabase Client safely
 let db = null;
