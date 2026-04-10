@@ -33,7 +33,9 @@ let state = {
         { name: "Trypsin-EDTA", icon: "🧪", status: "Low Stock", supplier: "Corning", notes: "Order more for next month." }
     ],
     supplies: [],
-    theme: 'dark'
+    theme: 'dark',
+    isAuthenticated: false,
+    pendingAction: null
 };
 
 // DOM Elements
@@ -118,13 +120,20 @@ function checkBookingConflict(resource, dateKey, start, end) {
 }
 
 /**
- * Validates supervisor access with a password prompt.
+ * Validates supervisor access using a custom modal.
+ * @param {Function} callback - The action to perform if authorized.
  */
-function checkAccess() {
-    const pwd = prompt("Authorized Personnel Only\nPlease enter supervisor password:");
-    if (pwd === "rdflores3") return true;
-    showToast("Access Denied: Invalid Password", "error");
-    return false;
+function checkAccess(callback) {
+    if (state.isAuthenticated) {
+        callback();
+        return;
+    }
+
+    state.pendingAction = callback;
+    document.getElementById('auth-password').value = "";
+    document.getElementById('auth-error').classList.add('hidden');
+    document.getElementById('auth-modal').classList.add('active');
+    document.getElementById('auth-password').focus();
 }
 
 /**
@@ -874,27 +883,63 @@ function setupEventListeners() {
     document.addEventListener('click', (e) => {
         const removeBtn = e.target.closest('.remove-btn');
         const editBtn = e.target.closest('.edit-btn');
+        const confirmAuthBtn = e.target.closest('#confirm-auth');
+        const cancelAuthBtn = e.target.closest('#cancel-auth');
 
         if (removeBtn) {
-            if (!checkAccess()) return;
             const id = removeBtn.getAttribute('data-id');
             const category = removeBtn.getAttribute('data-category');
-
-            if (category === 'maintenance') {
-                removeMaintenance(id);
-            } else if (category === 'booking') {
-                const dateKey = removeBtn.getAttribute('data-datekey');
-                removeBookingUI(dateKey, id);
-            } else {
-                removeInventory(category, id);
-            }
+            
+            checkAccess(() => {
+                if (category === 'maintenance') {
+                    removeMaintenance(id);
+                } else if (category === 'booking') {
+                    const dateKey = removeBtn.getAttribute('data-datekey');
+                    removeBookingUI(dateKey, id);
+                } else {
+                    removeInventory(category, id);
+                }
+            });
         }
 
         if (editBtn) {
-            if (!checkAccess()) return;
             const id = editBtn.getAttribute('data-id');
             const category = editBtn.getAttribute('data-category');
-            openEditModal(category, id);
+            checkAccess(() => openEditModal(category, id));
+        }
+
+        if (confirmAuthBtn) {
+            const input = document.getElementById('auth-password');
+            const error = document.getElementById('auth-error');
+            const modalContent = document.querySelector('#auth-modal .modal-content');
+
+            if (input.value === "rdflores3") {
+                state.isAuthenticated = true;
+                document.getElementById('auth-modal').classList.remove('active');
+                if (state.pendingAction) {
+                    state.pendingAction();
+                    state.pendingAction = null;
+                }
+                showToast("Supervisor Access Granted");
+            } else {
+                error.classList.remove('hidden');
+                modalContent.classList.add('shake');
+                setTimeout(() => modalContent.classList.remove('shake'), 500);
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        if (cancelAuthBtn) {
+            document.getElementById('auth-modal').classList.remove('active');
+            state.pendingAction = null;
+        }
+    });
+
+    // Support Enter key for login
+    document.getElementById('auth-password').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('confirm-auth').click();
         }
     });
 

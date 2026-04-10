@@ -520,6 +520,28 @@
         </div>
     </div>
 
+    <!-- Supervisor Authorization Modal -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content glass" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center;">
+                <h2 style="color: var(--accent);">Supervisor Access</h2>
+            </div>
+            <div class="auth-body" style="padding: 10px 0 20px;">
+                <p class="subtitle" style="margin-bottom: 24px;">This action is protected. Please enter the laboratory supervisor password to proceed.</p>
+                <div class="form-group">
+                    <input type="password" id="auth-password" placeholder="Enter Supervisor Password" style="text-align: center; letter-spacing: 4px; font-size: 18px;">
+                </div>
+                <div id="auth-error" class="hidden" style="color: #f85149; font-size: 13px; margin-top: -10px; margin-bottom: 10px; font-weight: 600;">
+                    Invalid password. Access denied.
+                </div>
+            </div>
+            <div class="modal-actions" style="justify-content: center;">
+                <button type="button" class="btn btn-secondary" id="cancel-auth">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-auth">Authorize</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
 
