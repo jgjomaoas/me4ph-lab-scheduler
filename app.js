@@ -913,7 +913,7 @@ function setupEventListeners() {
             const error = document.getElementById('auth-error');
             const modalContent = document.querySelector('#auth-modal .modal-content');
 
-            if (input.value === "rdflores3") {
+            if (input.value.trim() === "rdflores3") {
                 state.isAuthenticated = true;
                 document.getElementById('auth-modal').classList.remove('active');
                 if (state.pendingAction) {
@@ -935,6 +935,23 @@ function setupEventListeners() {
             state.pendingAction = null;
         }
     });
+
+    // Password Visibility Toggle
+    const toggleAuthPass = document.getElementById('toggle-auth-password');
+    if (toggleAuthPass) {
+        toggleAuthPass.addEventListener('click', () => {
+            const input = document.getElementById('auth-password');
+            if (input.type === 'password') {
+                input.type = 'text';
+                input.style.letterSpacing = 'normal';
+                toggleAuthPass.textContent = '👁️‍🗨️';
+            } else {
+                input.type = 'password';
+                input.style.letterSpacing = '4px';
+                toggleAuthPass.textContent = '👁️';
+            }
+        });
+    }
 
     // Support Enter key for login
     document.getElementById('auth-password').addEventListener('keypress', (e) => {
@@ -1199,10 +1216,9 @@ function loadStateLocal() {
     if (savedTheme) state.theme = savedTheme;
 }
 
-// =============================================
 // --- BOOT ---
 // =============================================
-init();
+// init() called at end of file
 
 /**
  * Renders the Reports view based on the selected period.

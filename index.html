@@ -528,8 +528,9 @@
             </div>
             <div class="auth-body" style="padding: 10px 0 20px;">
                 <p class="subtitle" style="margin-bottom: 24px;">This action is protected. Please enter the laboratory supervisor password to proceed.</p>
-                <div class="form-group">
-                    <input type="password" id="auth-password" placeholder="Enter Supervisor Password" style="text-align: center; letter-spacing: 4px; font-size: 18px;">
+                <div class="form-group" style="position: relative;">
+                    <input type="password" id="auth-password" placeholder="Enter Supervisor Password" style="text-align: center; letter-spacing: 4px; font-size: 18px; padding-right: 48px;">
+                    <button type="button" id="toggle-auth-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 18px; cursor: pointer; opacity: 0.6; padding: 5px;" title="Toggle Password Visibility">👁️</button>
                 </div>
                 <div id="auth-error" class="hidden" style="color: #f85149; font-size: 13px; margin-top: -10px; margin-bottom: 10px; font-weight: 600;">
                     Invalid password. Access denied.
