@@ -291,10 +291,11 @@
     <div id="media-modal" class="modal-overlay">
         <div class="modal-content glass">
             <header class="modal-header">
-                <h2>Log Laboratory Media</h2>
+                <h2 id="media-modal-title">Log Laboratory Media</h2>
                 <button class="close-btn" id="close-media-modal">&times;</button>
             </header>
             <form id="media-form">
+                <input type="hidden" id="media-edit-id">
                 <div class="form-group">
                     <label for="media-name">Media Name / Type</label>
                     <input type="text" id="media-name" placeholder="e.g. DMEM High Glucose" required>
@@ -330,7 +331,7 @@
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-media">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Log Media</button>
+                    <button type="submit" class="btn btn-primary" id="media-submit-btn">Log Media</button>
                 </div>
             </form>
         </div>
@@ -340,10 +341,11 @@
     <div id="reagents-modal" class="modal-overlay">
         <div class="modal-content glass">
             <header class="modal-header">
-                <h2>Log Laboratory Reagent</h2>
+                <h2 id="reagents-modal-title">Log Laboratory Reagent</h2>
                 <button class="close-btn" id="close-reagents-modal">&times;</button>
             </header>
             <form id="reagents-form">
+                <input type="hidden" id="reagents-edit-id">
                 <div class="form-group">
                     <label for="reagent-name">Reagent Name</label>
                     <input type="text" id="reagent-name" placeholder="e.g. PBS 10X Buffer" required>
@@ -377,7 +379,7 @@
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-reagent">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Log Reagent</button>
+                    <button type="submit" class="btn btn-primary" id="reagents-submit-btn">Log Reagent</button>
                 </div>
             </form>
         </div>
@@ -387,10 +389,11 @@
     <div id="supplies-modal" class="modal-overlay">
         <div class="modal-content glass">
             <header class="modal-header">
-                <h2>Add Supply / Material</h2>
+                <h2 id="supplies-modal-title">Add Supply / Material</h2>
                 <button class="close-btn" id="close-supplies-modal">&times;</button>
             </header>
             <form id="supplies-form">
+                <input type="hidden" id="supplies-edit-id">
                 <div class="form-group">
                     <label for="supply-name">Item Name / Description</label>
                     <input type="text" id="supply-name" placeholder="e.g. Nitrile Gloves (Medium)" required>
@@ -423,7 +426,7 @@
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-supply">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add to Inventory</button>
+                    <button type="submit" class="btn btn-primary" id="supplies-submit-btn">Add to Inventory</button>
                 </div>
             </form>
         </div>
@@ -433,10 +436,11 @@
     <div id="maintenance-modal" class="modal-overlay">
         <div class="modal-content glass">
             <header class="modal-header">
-                <h2>Equipment Status Report</h2>
+                <h2 id="maintenance-modal-title">Equipment Status Report</h2>
                 <button class="close-btn" id="close-maintenance-modal">&times;</button>
             </header>
             <form id="maintenance-form">
+                <input type="hidden" id="maintenance-edit-id">
                 <div class="form-group">
                     <label for="maint-name">Equipment / System Name</label>
                     <input type="text" id="maint-name" placeholder="e.g. Centrifuge X-9" required>
@@ -474,7 +478,7 @@
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-maintenance">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update System Status</button>
+                    <button type="submit" class="btn btn-primary" id="maintenance-submit-btn">Update System Status</button>
                 </div>
             </form>
         </div>

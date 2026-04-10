@@ -118,6 +118,16 @@ function checkBookingConflict(resource, dateKey, start, end) {
 }
 
 /**
+ * Validates supervisor access with a password prompt.
+ */
+function checkAccess() {
+    const pwd = prompt("Authorized Personnel Only\nPlease enter supervisor password:");
+    if (pwd === "rdflores3") return true;
+    showToast("Access Denied: Invalid Password", "error");
+    return false;
+}
+
+/**
  * Formats a Date object into a "YYYY-MM-DD" key string.
  */
 function formatDateKey(date) {
@@ -465,6 +475,7 @@ function renderMaintenance() {
                 <span class="status-tag ${statusClass}">${statusLabel}</span>
                 <div class="header-actions">
                     <span class="equipment-icon">${item.icon}</span>
+                    <button class="edit-btn" data-category="maintenance" data-id="${item.id}" title="Edit Registration">✎</button>
                     <button class="remove-btn" data-category="maintenance" data-id="${item.id}" title="Remove Equipment">×</button>
                 </div>
             </div>
@@ -495,6 +506,7 @@ function renderInventory(category) {
                 <span class="status-tag tag-${statusClass}">${item.status || 'N/A'}</span>
                 <div class="header-actions">
                     <span class="equipment-icon">${item.icon || '📦'}</span>
+                    <button class="edit-btn" data-category="${category}" data-id="${item.id}" title="Edit Item">✎</button>
                     <button class="remove-btn" data-category="${category}" data-id="${item.id}" title="Remove Item">×</button>
                 </div>
             </div>
@@ -547,6 +559,7 @@ function renderSupplies() {
                 <span class="status-tag ${tagClass}">${item.category || 'General'}</span>
                 <div class="header-actions">
                     <span class="equipment-icon">${icon}</span>
+                    <button class="edit-btn" data-category="supplies" data-id="${item.id}" title="Edit Item">✎</button>
                     <button class="remove-btn" data-category="supplies" data-id="${item.id}" title="Remove Item">×</button>
                 </div>
             </div>
@@ -688,6 +701,12 @@ function setupEventListeners() {
     setupModal('add-supply-btn',   'supplies-modal',    'close-supplies-modal',    'cancel-supply');
     setupModal('report-issue-btn', 'maintenance-modal', 'close-maintenance-modal', 'cancel-maintenance');
 
+    // Ensure buttons reset to "Log" mode when adding new
+    document.getElementById('add-media-btn').addEventListener('click', () => resetModal('media'));
+    document.getElementById('add-reagent-btn').addEventListener('click', () => resetModal('reagents'));
+    document.getElementById('add-supply-btn').addEventListener('click', () => resetModal('supplies'));
+    document.getElementById('report-issue-btn').addEventListener('click', () => resetModal('maintenance'));
+
     // Theme Toggle
     const headerToggle = document.getElementById('header-theme-toggle');
     if (headerToggle) {
@@ -719,24 +738,29 @@ function setupEventListeners() {
     mediaForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         updateStatus('Syncing...', 'warning');
-        const newItem = {
+        const editId = document.getElementById('media-edit-id').value;
+        const itemBody = {
             name: document.getElementById('media-name').value,
             icon: document.getElementById('media-icon').value,
             status: document.getElementById('media-status').value,
             supplier: document.getElementById('media-supplier').value,
             notes: document.getElementById('media-notes').value
         };
-        const { data, error } = await db.from('media').insert([newItem]).select();
+
+        let result;
+        if (editId) {
+            result = await db.from('media').update(itemBody).eq('id', editId).select();
+        } else {
+            result = await db.from('media').insert([itemBody]).select();
+        }
+
+        const { data, error } = result;
         if (!error && data) {
             mediaModal.classList.remove('active');
             mediaForm.reset();
-            showToast('Media Inventory Updated');
+            showToast(editId ? 'Media Record Updated' : 'Media Inventory Updated');
             updateStatus('Synced', 'success');
-            // Optimistic Instant Update
-            state.media.push(data[0]);
-            renderInventory('media');
-            // Background sync
-            fetchFullState();
+            fetchFullState().then(() => renderInventory('media'));
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -748,24 +772,29 @@ function setupEventListeners() {
     reagentsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         updateStatus('Syncing...', 'warning');
-        const newItem = {
+        const editId = document.getElementById('reagents-edit-id').value;
+        const itemBody = {
             name: document.getElementById('reagent-name').value,
             icon: document.getElementById('reagent-icon').value,
             status: document.getElementById('reagent-status').value,
             supplier: document.getElementById('reagent-supplier').value,
             notes: document.getElementById('reagent-notes').value
         };
-        const { data, error } = await db.from('reagents').insert([newItem]).select();
+
+        let result;
+        if (editId) {
+            result = await db.from('reagents').update(itemBody).eq('id', editId).select();
+        } else {
+            result = await db.from('reagents').insert([itemBody]).select();
+        }
+
+        const { data, error } = result;
         if (!error && data) {
             reagentsModal.classList.remove('active');
             reagentsForm.reset();
-            showToast('Reagent Logged Successfully');
+            showToast(editId ? 'Reagent Record Updated' : 'Reagent Logged Successfully');
             updateStatus('Synced', 'success');
-            // Optimistic Instant Update
-            state.reagents.push(data[0]);
-            renderInventory('reagents');
-            // Background sync
-            fetchFullState();
+            fetchFullState().then(() => renderInventory('reagents'));
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -777,25 +806,29 @@ function setupEventListeners() {
     suppliesForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         updateStatus('Syncing...', 'warning');
-        const newItem = {
+        const editId = document.getElementById('supplies-edit-id').value;
+        const itemBody = {
             name: document.getElementById('supply-name').value,
             category: document.getElementById('supply-category').value,
             quantity: document.getElementById('supply-quantity').value,
             unit_cost: parseFloat(document.getElementById('supply-unit-cost').value) || 0,
             supplier: document.getElementById('supply-supplier').value
         };
-        const { data, error } = await db.from('supplies').insert([newItem]).select();
+
+        let result;
+        if (editId) {
+            result = await db.from('supplies').update(itemBody).eq('id', editId).select();
+        } else {
+            result = await db.from('supplies').insert([itemBody]).select();
+        }
+
+        const { data, error } = result;
         if (!error && data) {
             suppliesModal.classList.remove('active');
             suppliesForm.reset();
-            showToast('Supply Catalog Updated');
+            showToast(editId ? 'Supply Record Updated' : 'Supply Catalog Updated');
             updateStatus('Synced', 'success');
-            // Optimistic Instant Update
-            if (!state.supplies) state.supplies = [];
-            state.supplies.push(data[0]);
-            renderSupplies();
-            // Background sync
-            fetchFullState();
+            fetchFullState().then(() => renderSupplies());
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -807,24 +840,29 @@ function setupEventListeners() {
     maintenanceForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         updateStatus('Syncing...', 'warning');
-        const newItem = {
+        const editId = document.getElementById('maintenance-edit-id').value;
+        const itemBody = {
             name: document.getElementById('maint-name').value,
             icon: document.getElementById('maint-icon').value,
             status: document.getElementById('maint-status').value,
             supplier: document.getElementById('maint-supplier').value,
             notes: document.getElementById('maint-notes').value
         };
-        const { data, error } = await db.from('maintenance').insert([newItem]).select();
+
+        let result;
+        if (editId) {
+            result = await db.from('maintenance').update(itemBody).eq('id', editId).select();
+        } else {
+            result = await db.from('maintenance').insert([itemBody]).select();
+        }
+
+        const { data, error } = result;
         if (!error && data) {
             maintenanceModal.classList.remove('active');
             maintenanceForm.reset();
-            showToast('System Diagnostics Updated');
+            showToast(editId ? 'System Status Updated' : 'System Diagnostics Updated');
             updateStatus('Synced', 'success');
-            // Optimistic Instant Update
-            state.maintenance.push(data[0]);
-            renderMaintenance();
-            // Background sync
-            fetchFullState();
+            fetchFullState().then(() => renderMaintenance());
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -832,10 +870,13 @@ function setupEventListeners() {
         }
     });
 
-    // --- Global Event Delegation (Deletion) ---
+    // --- Global Event Delegation (Deletion & Editing) ---
     document.addEventListener('click', (e) => {
         const removeBtn = e.target.closest('.remove-btn');
+        const editBtn = e.target.closest('.edit-btn');
+
         if (removeBtn) {
+            if (!checkAccess()) return;
             const id = removeBtn.getAttribute('data-id');
             const category = removeBtn.getAttribute('data-category');
 
@@ -848,7 +889,94 @@ function setupEventListeners() {
                 removeInventory(category, id);
             }
         }
+
+        if (editBtn) {
+            if (!checkAccess()) return;
+            const id = editBtn.getAttribute('data-id');
+            const category = editBtn.getAttribute('data-category');
+            openEditModal(category, id);
+        }
     });
+
+    // Helper to open modal in Edit mode
+    function openEditModal(category, id) {
+        let item = null;
+        if (category === 'maintenance') item = state.maintenance.find(i => i.id == id);
+        else if (category === 'media') item = state.media.find(i => i.id == id);
+        else if (category === 'reagents') item = state.reagents.find(i => i.id == id);
+        else if (category === 'supplies') item = state.supplies.find(i => i.id == id);
+
+        if (!item) return;
+
+        if (category === 'media') {
+            document.getElementById('media-modal-title').textContent = "Update Laboratory Media";
+            document.getElementById('media-submit-btn').textContent = "Save Changes";
+            document.getElementById('media-edit-id').value = id;
+            document.getElementById('media-name').value = item.name;
+            document.getElementById('media-icon').value = item.icon;
+            document.getElementById('media-status').value = item.status;
+            document.getElementById('media-supplier').value = item.supplier;
+            document.getElementById('media-notes').value = item.notes;
+            mediaModal.classList.add('active');
+        } else if (category === 'reagents') {
+            document.getElementById('reagents-modal-title').textContent = "Update Laboratory Reagent";
+            document.getElementById('reagents-submit-btn').textContent = "Save Changes";
+            document.getElementById('reagents-edit-id').value = id;
+            document.getElementById('reagent-name').value = item.name;
+            document.getElementById('reagent-icon').value = item.icon;
+            document.getElementById('reagent-status').value = item.status;
+            document.getElementById('reagent-supplier').value = item.supplier;
+            document.getElementById('reagent-notes').value = item.notes;
+            reagentsModal.classList.add('active');
+        } else if (category === 'supplies') {
+            document.getElementById('supplies-modal-title').textContent = "Update Supply / Material";
+            document.getElementById('supplies-submit-btn').textContent = "Save Changes";
+            document.getElementById('supplies-edit-id').value = id;
+            document.getElementById('supply-name').value = item.name;
+            document.getElementById('supply-category').value = item.category;
+            document.getElementById('supply-quantity').value = item.quantity;
+            document.getElementById('supply-unit-cost').value = item.unit_cost;
+            document.getElementById('supply-supplier').value = item.supplier;
+            suppliesModal.classList.add('active');
+        } else if (category === 'maintenance') {
+            document.getElementById('maintenance-modal-title').textContent = "Edit Equipment Status";
+            document.getElementById('maintenance-submit-btn').textContent = "Save Changes";
+            document.getElementById('maintenance-edit-id').value = id;
+            document.getElementById('maint-name').value = item.name;
+            document.getElementById('maint-icon').value = item.icon;
+            document.getElementById('maint-status').value = item.status;
+            document.getElementById('maint-supplier').value = item.supplier;
+            document.getElementById('maint-notes').value = item.notes;
+            maintenanceModal.classList.add('active');
+        }
+    }
+
+    /**
+     * Resets modals to "Log" mode.
+     */
+    function resetModal(category) {
+        if (category === 'media') {
+            document.getElementById('media-modal-title').textContent = "Log Laboratory Media";
+            document.getElementById('media-submit-btn').textContent = "Log Media";
+            document.getElementById('media-edit-id').value = "";
+            mediaForm.reset();
+        } else if (category === 'reagents') {
+            document.getElementById('reagents-modal-title').textContent = "Log Laboratory Reagent";
+            document.getElementById('reagents-submit-btn').textContent = "Log Reagent";
+            document.getElementById('reagents-edit-id').value = "";
+            reagentsForm.reset();
+        } else if (category === 'supplies') {
+            document.getElementById('supplies-modal-title').textContent = "Add Supply / Material";
+            document.getElementById('supplies-submit-btn').textContent = "Add to Inventory";
+            document.getElementById('supplies-edit-id').value = "";
+            suppliesForm.reset();
+        } else if (category === 'maintenance') {
+            document.getElementById('maintenance-modal-title').textContent = "Equipment Status Report";
+            document.getElementById('maintenance-submit-btn').textContent = "Update System Status";
+            document.getElementById('maintenance-edit-id').value = "";
+            maintenanceForm.reset();
+        }
+    }
 
     // Confirmation Modal
     document.getElementById('confirm-cancel').addEventListener('click', () => {
