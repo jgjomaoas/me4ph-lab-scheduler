@@ -79,10 +79,58 @@
 
             <section class="dashboard-scrollable">
                 <div id="schedule-view">
-                    <div id="analytics-view">
-                        <h2 class="analytics-section-title">Weekly Equipment Utilization</h2>
-                        <div class="analytics-container" id="analytics-container">
-                            <!-- JS will populate cards here -->
+                    <!-- Live Lab Overview Stats -->
+                    <div class="stats-overview-grid">
+                        <div class="stat-card glass animate-slide-up">
+                            <div class="stat-icon" style="background: rgba(0, 210, 255, 0.1); color: var(--accent);">📊</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Today's Sessions</span>
+                                <h2 class="stat-value" id="stat-today-bookings">0</h2>
+                            </div>
+                        </div>
+                        <div class="stat-card glass animate-slide-up" style="animation-delay: 0.1s;">
+                            <div class="stat-icon" style="background: rgba(35, 134, 54, 0.1); color: #3fb950;">⚡</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Active Resources</span>
+                                <h2 class="stat-value" id="stat-active-resources">0</h2>
+                            </div>
+                        </div>
+                        <div class="stat-card glass animate-slide-up" style="animation-delay: 0.2s;">
+                            <div class="stat-icon" style="background: rgba(210, 153, 34, 0.1); color: var(--warning);">🕒</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Next Slot</span>
+                                <h2 class="stat-value" id="stat-next-slot">Available</h2>
+                            </div>
+                        </div>
+                        <div class="stat-card glass animate-slide-up" style="animation-delay: 0.3s;">
+                            <div class="stat-icon" style="background: rgba(248, 81, 73, 0.1); color: var(--danger);">🛠️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Offline Systems</span>
+                                <h2 class="stat-value" id="stat-offline-count">0</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-row">
+                        <div class="analytics-main glass">
+                            <div class="section-header">
+                                <h2 class="analytics-section-title">Equipment Utilization</h2>
+                                <span class="badge">Weekly Report</span>
+                            </div>
+                            <div class="analytics-container" id="analytics-container">
+                                <!-- JS will populate cards here -->
+                            </div>
+                        </div>
+                        
+                        <div class="activity-feed glass">
+                            <div class="section-header">
+                                <h2 class="analytics-section-title">Session Feed</h2>
+                                <span class="pulse-dot green"></span>
+                            </div>
+                            <div class="feed-content" id="recent-activity-feed">
+                                <!-- JS will populate activity items here -->
+                                <div class="empty-feed">Analyzing past logs...</div>
+                            </div>
                         </div>
                     </div>
 
@@ -123,13 +171,21 @@
                         <!-- Agenda Sidebar -->
                         <aside class="agenda-sidebar glass">
                             <div class="agenda-header">
-                                <h3>Today's Agenda</h3>
+                                <div class="agenda-title-row">
+                                    <h3>Daily Agenda</h3>
+                                    <span class="icon">📋</span>
+                                </div>
                                 <span class="agenda-date" id="agenda-date-label">April 9, 2026</span>
-                                <button class="btn btn-primary add-res-btn hidden" id="add-res-btn" style="width:100%; margin-top:12px; font-size:12px; padding:8px;">+ Add Reservation</button>
+                                <button class="btn btn-primary add-res-btn hidden" id="add-res-btn" style="width:100%; margin-top:16px; font-weight: 700;">+ Secure Resource</button>
                             </div>
                             <div class="agenda-list" id="agenda-list">
                                 <!-- JS will populate agenda items here -->
-                                <div class="empty-agenda">No reservations for today.</div>
+                                <div class="empty-agenda">Select a date to view reservations.</div>
+                            </div>
+                            
+                            <div class="quick-tips glass">
+                                <strong>💡 Protocol Tip:</strong>
+                                <p>Double-check your buffer volumes before starting mass spec runs.</p>
                             </div>
                         </aside>
                     </div>

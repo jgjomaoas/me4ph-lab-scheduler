@@ -15,7 +15,7 @@ try {
 }
 
 let state = {
-    currentDate: new Date(2026, 3, 1), // April 2026
+    currentDate: new Date(),
     selectedDate: null,
     bookings: {},
     maintenance: [
@@ -204,7 +204,7 @@ function renderWeeklyAnalytics() {
     analyticsContainer.innerHTML = '';
 
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0 is Sunday
+    const dayOfWeek = now.getDay(); 
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - dayOfWeek);
     startOfWeek.setHours(0, 0, 0, 0);
@@ -220,7 +220,14 @@ function renderWeeklyAnalytics() {
         'Mass Spectrometer': '⚗️',
         'Ultra-Low Freezer': '❄️',
         'Centrifuge X-1': '🌀',
-        'Biosafety Cabinet': '🛡️'
+        'Biosafety Cabinet': '🛡️',
+        'Flow Cytometer': '🌈',
+        'Incubator A': '🌡️',
+        'Incubator B': '🌡️',
+        'Bench 1': '🪑',
+        'Bench 2': '🪑',
+        'Bench 3': '🪑',
+        'Bench 4': '🪑'
     };
 
     // Aggregate sessions within the week
@@ -228,14 +235,15 @@ function renderWeeklyAnalytics() {
         const d = new Date(dateKey + 'T00:00:00');
         if (d >= startOfWeek && d <= endOfWeek) {
             state.bookings[dateKey].forEach(b => {
-                usageData[b.resource] = (usageData[b.resource] || 0) + 1;
+                const normName = b.resource;
+                usageData[normName] = (usageData[normName] || 0) + 1;
             });
         }
     });
 
     const sortedResources = Object.entries(usageData)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 4); // Top 4
+        .slice(0, 6); // Top 6
 
     if (sortedResources.length === 0) {
         analyticsContainer.innerHTML = '<div class="empty-agenda" style="grid-column: 1/-1;">No session data for this week yet.</div>';
@@ -245,11 +253,11 @@ function renderWeeklyAnalytics() {
     const maxUsage = sortedResources[0][1];
 
     sortedResources.forEach(([name, count]) => {
-        const percentage = (count / maxUsage) * 100;
+        const percentage = Math.max((count / maxUsage) * 100, 10);
         const icon = iconMap[name] || '🛠️';
         
         const card = document.createElement('div');
-        card.className = 'analytics-card glass';
+        card.className = 'analytics-card animate-slide-up';
         card.innerHTML = `
             <div class="card-header">
                 <span class="icon">${icon}</span>
@@ -261,6 +269,99 @@ function renderWeeklyAnalytics() {
             </div>
         `;
         analyticsContainer.appendChild(card);
+    });
+}
+
+/**
+ * Renders the top-level lab stats overview.
+ */
+function renderDashboardStats() {
+    const todayKey = formatDateKey(new Date());
+    const todayBookings = state.bookings[todayKey] || [];
+    
+    // 1. Today's Sessions
+    const sessionsEl = document.getElementById('stat-today-bookings');
+    if (sessionsEl) sessionsEl.textContent = todayBookings.length;
+
+    // 2. Offline Systems
+    const offlineCount = state.maintenance.filter(i => i.status !== 'online').length;
+    const offlineEl = document.getElementById('stat-offline-count');
+    if (offlineEl) offlineEl.textContent = offlineCount;
+
+    // 3. Active Resources (Currently in use)
+    const now = new Date();
+    const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const activeResources = todayBookings.filter(b => {
+        return currentTimeStr >= b.start_time && currentTimeStr <= b.end_time;
+    });
+    const activeEl = document.getElementById('stat-active-resources');
+    if (activeEl) activeEl.textContent = activeResources.length;
+
+    // 4. Next Slot
+    const nextSlotEl = document.getElementById('stat-next-slot');
+    if (nextSlotEl) {
+        const futureToday = todayBookings
+            .filter(b => b.start_time > currentTimeStr)
+            .sort((a, b) => a.start_time.localeCompare(b.start_time));
+        
+        if (futureToday.length > 0) {
+            nextSlotEl.textContent = formatTo12Hr(futureToday[0].start_time);
+            nextSlotEl.style.fontSize = '18px';
+        } else {
+            nextSlotEl.textContent = 'Available';
+            nextSlotEl.style.fontSize = '24px';
+        }
+    }
+}
+
+/**
+ * Renders the recent activity feed using real session data.
+ */
+function renderActivityFeed() {
+    const feedContainer = document.getElementById('recent-activity-feed');
+    if (!feedContainer) return;
+
+    // Flatten all bookings and sort by the most recent (even if in future, let's show nearest)
+    // Actually, let's show the last 5 added or upcoming
+    const allSessions = [];
+    Object.keys(state.bookings).forEach(date => {
+        state.bookings[date].forEach(b => {
+            allSessions.push({ ...b, date });
+        });
+    });
+
+    // Sort by date (descending) then time
+    allSessions.sort((a, b) => {
+        const dateCompare = b.date.localeCompare(a.date);
+        if (dateCompare !== 0) return dateCompare;
+        return b.start_time.localeCompare(a.start_time);
+    });
+
+    const recent = allSessions.slice(0, 5);
+    
+    if (recent.length === 0) {
+        feedContainer.innerHTML = '<div class="empty-feed">No recent activity detected.</div>';
+        return;
+    }
+
+    feedContainer.innerHTML = '';
+    recent.forEach(session => {
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+        
+        // Use first letter of name for avatar
+        const initial = session.user_name ? session.user_name.charAt(0).toUpperCase() : '?';
+        const isToday = session.date === formatDateKey(new Date());
+        const displayDate = isToday ? 'Today' : session.date;
+
+        item.innerHTML = `
+            <div class="activity-avatar">${initial}</div>
+            <div class="activity-details">
+                <p><strong>${session.user_name}</strong> reserved <strong>${session.resource}</strong></p>
+                <div class="time">${displayDate} at ${formatTo12Hr(session.start_time)}</div>
+            </div>
+        `;
+        feedContainer.appendChild(item);
     });
 }
 
@@ -285,6 +386,8 @@ async function init() {
     renderInventory('reagents');
     renderSupplies();
     renderWeeklyAnalytics();
+    renderDashboardStats();
+    renderActivityFeed();
     updateClock();
     setInterval(updateClock, 1000);
     setupEventListeners();
@@ -337,6 +440,18 @@ function applyTheme(theme) {
 function updateClock() {
     const now = new Date();
     clockDisplay.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    
+    // Update header date
+    const dateOptions = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+    const dateDisplay = document.getElementById('current-date');
+    if (dateDisplay) {
+        dateDisplay.textContent = now.toLocaleDateString('en-US', dateOptions);
+    }
+    
+    // Refresh stats every minute
+    if (now.getSeconds() === 0) {
+        renderDashboardStats();
+    }
 }
 
 // =============================================
@@ -769,7 +884,10 @@ function setupEventListeners() {
             mediaForm.reset();
             showToast(editId ? 'Media Record Updated' : 'Media Inventory Updated');
             updateStatus('Synced', 'success');
-            fetchFullState().then(() => renderInventory('media'));
+            fetchFullState().then(() => {
+                renderInventory('media');
+                renderDashboardStats();
+            });
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -803,7 +921,10 @@ function setupEventListeners() {
             reagentsForm.reset();
             showToast(editId ? 'Reagent Record Updated' : 'Reagent Logged Successfully');
             updateStatus('Synced', 'success');
-            fetchFullState().then(() => renderInventory('reagents'));
+            fetchFullState().then(() => {
+                renderInventory('reagents');
+                renderDashboardStats();
+            });
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -837,7 +958,10 @@ function setupEventListeners() {
             suppliesForm.reset();
             showToast(editId ? 'Supply Record Updated' : 'Supply Catalog Updated');
             updateStatus('Synced', 'success');
-            fetchFullState().then(() => renderSupplies());
+            fetchFullState().then(() => {
+                renderSupplies();
+                renderDashboardStats();
+            });
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -871,7 +995,10 @@ function setupEventListeners() {
             maintenanceForm.reset();
             showToast(editId ? 'System Status Updated' : 'System Diagnostics Updated');
             updateStatus('Synced', 'success');
-            fetchFullState().then(() => renderMaintenance());
+            fetchFullState().then(() => {
+                renderMaintenance();
+                renderDashboardStats();
+            });
         } else {
             console.error('Supabase error:', JSON.stringify(error));
             showToast('Sync Failed: ' + (error?.message || 'Unknown'), 'error');
@@ -1143,6 +1270,8 @@ function setupEventListeners() {
             state.bookings[b.date_key].push(b);
             renderCalendar();
             renderWeeklyAnalytics();
+            renderDashboardStats();
+            renderActivityFeed();
             // Background sync
             fetchFullState();
         } else {
