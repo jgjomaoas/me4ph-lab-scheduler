@@ -370,6 +370,7 @@ function renderActivityFeed() {
 // =============================================
 
 async function init() {
+    console.log('--- Initializing ME4PH Lab Engine [v101] ---');
     updateStatus('Connecting...', 'warning');
 
     if (!db) {
@@ -1308,6 +1309,8 @@ async function fetchFullState() {
         state.supplies = supplies.data || [];
 
         renderWeeklyAnalytics();
+        renderDashboardStats();
+        renderActivityFeed();
         updateStatus('Cloud Sync: Active', 'success');
     } catch (err) {
         console.error('fetchFullState error:', err);
