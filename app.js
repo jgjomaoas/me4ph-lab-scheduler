@@ -857,6 +857,14 @@ function setupEventListeners() {
         copyBtn.addEventListener('click', copyAuditLogToClipboard);
     }
 
+    // --- View Switching ---
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const viewId = item.getAttribute('data-view');
+            if (viewId) switchView(viewId);
+        });
+    });
+
     // --- Form Submissions ---
 
     // Media Form
@@ -1437,6 +1445,46 @@ function processReportData(start, end) {
     if (reportView) {
         reportView.setAttribute('data-date', new Date().toLocaleDateString());
     }
+}
+
+/**
+ * Handles switching between different dashboard views (Schedule, Media, etc.)
+ */
+function switchView(viewId) {
+    const views = [
+        'schedule-view',
+        'media-view',
+        'reagents-view',
+        'supplies-view',
+        'maintenance-view',
+        'reports-view'
+    ];
+
+    views.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (id === viewId) {
+                el.classList.remove('hidden');
+                // Trigger specific renders if needed
+                if (id === 'reports-view') renderReports('yesterday');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+    });
+
+    // Update Nav Active State
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('data-view') === viewId) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+
+    // Scroll back to top
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) mainContent.scrollTop = 0;
 }
 
 

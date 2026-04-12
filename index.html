@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=300">
+    <link rel="stylesheet" href="styles.css?v=400">
 </head>
 
 <body class="dark-theme">
@@ -25,29 +25,29 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li class="nav-item active" id="nav-dashboard">
+                    <li class="nav-item active" id="nav-dashboard" data-view="schedule-view">
                         <span class="icon">📅</span>
-                        <span class="label">Schedule</span>
+                        <span class="label">SCHEDULE</span>
                     </li>
-                    <li class="nav-item" id="nav-media">
-                        <span class="icon">🧫</span>
-                        <span class="label">Media</span>
+                    <li class="nav-item" id="nav-media" data-view="media-view">
+                        <span class="icon">🥣</span>
+                        <span class="label">MEDIA</span>
                     </li>
-                    <li class="nav-item" id="nav-reagents">
+                    <li class="nav-item" id="nav-reagents" data-view="reagents-view">
                         <span class="icon">🧪</span>
-                        <span class="label">Reagents</span>
+                        <span class="label">REAGENTS</span>
                     </li>
-                    <li class="nav-item" id="nav-supplies">
+                    <li class="nav-item" id="nav-supplies" data-view="supplies-view">
                         <span class="icon">📦</span>
-                        <span class="label">Supplies &amp; Materials</span>
+                        <span class="label">SUPPLIES & MATERIALS</span>
                     </li>
-                    <li class="nav-item" id="nav-maintenance">
+                    <li class="nav-item" id="nav-maintenance" data-view="maintenance-view">
                         <span class="icon">🛠️</span>
-                        <span class="label">Under Maintenance</span>
+                        <span class="label">UNDER MAINTENANCE</span>
                     </li>
-                    <li class="nav-item" id="nav-reports">
+                    <li class="nav-item" id="nav-reports" data-view="reports-view">
                         <span class="icon">📜</span>
-                        <span class="label">Audit Reports</span>
+                        <span class="label">AUDIT REPORTS</span>
                     </li>
                 </ul>
             </nav>
@@ -604,7 +604,7 @@
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=300"></script>
+    <script src="app.js?v=400"></script>
 </body>
 
 </html>

@@ -41,6 +41,8 @@ body {
     height: 100vh;
 }
 
+.hidden { display: none !important; }
+
 .app-container {
     display: flex;
     height: 100vh;
