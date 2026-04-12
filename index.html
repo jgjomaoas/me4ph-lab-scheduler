@@ -1,275 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ME4PH Lab | Automated Protocol</title>
-    <meta name="description"
-        content="State-of-the-art laboratory equipment scheduling and protocol management system for ME4PH Lab.">
+    <title>ME4PH Lab | Dashboard v2</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2100">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
-
-<body class="dark-theme">
-    <div class="app-container">
-        <!-- Sidebar Navigation -->
+<body class="scientific-slate">
+    <div class="app-layout">
+        <!-- Glassmorphism Sidebar -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-icon">M</span>
-                    <span class="logo-text">ME4PH <span class="accent">Lab</span></span>
-                </div>
+            <div class="sidebar-brand">
+                <div class="brand-icon">M</div>
+                <span class="brand-name">ME4PH <span style="color:var(--accent)">Lab</span></span>
             </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li class="nav-item active" id="nav-dashboard" data-view="schedule-view">
-                        <span class="icon">📅</span>
-                        <span class="label">Schedule</span>
-                    </li>
-                    <li class="nav-item" id="nav-media" data-view="media-view">
-                        <span class="icon">🥣</span>
-                        <span class="label">Media</span>
-                    </li>
-                    <li class="nav-item" id="nav-reagents" data-view="reagents-view">
-                        <span class="icon">🧪</span>
-                        <span class="label">Reagents</span>
-                    </li>
-                    <li class="nav-item" id="nav-supplies" data-view="supplies-view">
-                        <span class="icon">📦</span>
-                        <span class="label">Supplies & Materials</span>
-                    </li>
-                    <li class="nav-item" id="nav-maintenance" data-view="maintenance-view">
-                        <span class="icon">🛠️</span>
-                        <span class="label">Under Maintenance</span>
-                    </li>
-                    <li class="nav-item" id="nav-reports" data-view="reports-view">
-                        <span class="icon">📜</span>
-                        <span class="label">Audit Reports</span>
-                    </li>
-                </ul>
+            <nav class="nav-group">
+                <a href="#" class="nav-link active">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/></svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-link">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 12.41V7h2v4.59l3.71 3.71-1.42 1.41z"/></svg>
+                    Timeline
+                </a>
+                <a href="#" class="nav-link">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    Infrastructure
+                </a>
+                <a href="#" class="nav-link">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M21 3.01H3c-1.1 0-2 .9-2 2V18c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5.01c0-1.1-.9-2-2-2zM21 18H3V5.01h18V18zM10 12h2v2h-2zm0-4h2v2h-2zm4 4h2v2h-2zm0-4h2v2h-2zm-8 4h2v2H6zm0-4h2v2H6z"/></svg>
+                    Reports
+                </a>
+                <div style="margin-top:auto; padding:16px; border-radius:10px; background:var(--bg-surface-elevated); border:1px solid var(--border)">
+                    <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">System Status</div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="width:8px; height:8px; border-radius:50%; background:var(--success); box-shadow:0 0 10px var(--success)"></span>
+                        <span style="font-size:12px; font-weight:600; color:var(--text-secondary)">Sync: Active</span>
+                    </div>
+                </div>
             </nav>
-            <div class="sidebar-footer">
-                <div class="status-indicator">
-                    <span class="pulse-dot green" id="status-pulse"></span>
-                    <span class="status-text" id="status-text">Cloud Sync: Active</span>
-                </div>
-            </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="main-header glass">
-                <div class="header-left">
-                    <h1 id="page-title">Laboratory Timeline</h1>
-                    <p class="subtitle" id="current-date">Thursday, April 9, 2026</p>
+        <!-- Main Stage -->
+        <main class="main-stage">
+            <header class="stage-header">
+                <div class="stage-title">
+                    <h1>Lab Management Dashboard</h1>
+                    <p>Environmental Biology Division | Protocol Management</p>
                 </div>
-                <div class="header-right">
-                    <div class="time-container">
-                        <div class="time-display" id="digital-clock">03:55:00 PM</div>
-                        <button class="header-theme-toggle" id="header-theme-toggle" title="Toggle Laboratory Theme">
-                            <span class="icon">🌙</span>
-                            <span class="label">Midnight Mode</span>
-                        </button>
-                    </div>
+                <div style="text-align:right">
+                    <div class="mono" style="font-size:24px; color:var(--accent); font-weight:700;" id="stage-clock">18:50:35</div>
+                    <div style="font-size:12px; color:var(--text-muted); font-weight:600">April 12, 2026</div>
                 </div>
             </header>
 
-            <section class="dashboard-scrollable">
-                <div id="schedule-view">
-                    <!-- Live Lab Overview Stats -->
-                    <div class="stats-overview-grid">
-                        <div class="stat-card animate-slide-up">
-                            <div class="stat-icon" style="background: rgba(0, 210, 255, 0.1); color: var(--accent);">📊</div>
-                            <div class="stat-info">
-                                <span class="stat-label">Today's Sessions</span>
-                                <h2 class="stat-value" id="stat-today-bookings">0</h2>
-                            </div>
-                        </div>
-                        <div class="stat-card animate-slide-up" style="animation-delay: 0.1s;">
-                            <div class="stat-icon" style="background: rgba(35, 134, 54, 0.1); color: #3fb950;">⚡</div>
-                            <div class="stat-info">
-                                <span class="stat-label">Active Resources</span>
-                                <h2 class="stat-value" id="stat-active-resources">0</h2>
-                            </div>
-                        </div>
-                        <div class="stat-card animate-slide-up" style="animation-delay: 0.2s;">
-                            <div class="stat-icon" style="background: rgba(210, 153, 34, 0.1); color: var(--warning);">🕒</div>
-                            <div class="stat-info">
-                                <span class="stat-label">Next Slot</span>
-                                <h2 class="stat-value" id="stat-next-slot">Available</h2>
-                            </div>
-                        </div>
-                        <div class="stat-card animate-slide-up" style="animation-delay: 0.3s;">
-                            <div class="stat-icon" style="background: rgba(248, 81, 73, 0.1); color: var(--danger);">🛠️</div>
-                            <div class="stat-info">
-                                <span class="stat-label">Offline Systems</span>
-                                <h2 class="stat-value" id="stat-offline-count">0</h2>
-                            </div>
-                        </div>
+            <div class="bento-grid">
+                <!-- Module 1: Scheduling Engine -->
+                <section class="bento-card scheduling-module">
+                    <div class="card-label">
+                        <svg width="14" height="14" fill="var(--accent)" viewBox="0 0 24 24"><path d="M19 19H5V8h14v11zM16 1h-8v2h8V1zM9 22h6v2H9v-2zm10-18h-3V1h-2v3h-4V1H8v3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
+                        Scheduling Engine
                     </div>
-
-                    <div class="analytics-row">
-                        <div class="analytics-main glass">
-                            <div class="section-header">
-                                <h2 class="analytics-section-title">Equipment Utilization</h2>
-                                <span class="badge">Weekly Report</span>
-                            </div>
-                            <div class="analytics-container" id="analytics-container"></div>
-                        </div>
-                        
-                        <div class="activity-feed glass">
-                            <div class="section-header">
-                                <h2 class="analytics-section-title">Session Feed</h2>
-                                <span class="pulse-dot green"></span>
-                            </div>
-                            <div class="feed-content" id="recent-activity-feed"></div>
-                        </div>
-                    </div>
-
-                    <!-- Lab Protocol Alert -->
-                    <div class="protocol-alert glass">
-                        <div class="alert-icon">⚠️</div>
-                        <div class="alert-content">
-                            <h3>Active Protocol: Standard Hours (8:00 AM - 5:00 PM)</h3>
-                            <p>Laboratory usage after <strong>5:00 PM PHT</strong> requires a supervisor present and a
-                                valid Overtime (OT) Permit.</p>
-                        </div>
-                    </div>
-
-                    <div class="schedule-layout">
-                        <div class="calendar-wrapper glass">
-                            <div class="calendar-nav">
-                                <button class="nav-btn" id="prev-month">❮</button>
-                                <h2 id="month-year-display">April 2026</h2>
-                                <button class="nav-btn" id="next-month">❯</button>
-                            </div>
-                            <div class="calendar-header">
-                                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-                            </div>
-                            <div class="calendar-grid" id="calendar-grid"></div>
+                    
+                    <div class="booking-controls">
+                        <div class="form-group">
+                            <label style="display:block; font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:8px;">Select Equipment</label>
+                            <select class="input-field" style="width:100%">
+                                <option>Confocal Microscope v4</option>
+                                <option>PCR Thermal Cycler</option>
+                                <option>High-Speed Centrifuge</option>
+                            </select>
                         </div>
 
-                        <aside class="agenda-sidebar glass">
-                            <div class="agenda-header">
-                                <div class="agenda-title-row">
-                                    <h3>Daily Agenda</h3>
-                                    <span class="icon">📋</span>
-                                </div>
-                                <span class="agenda-date" id="agenda-date-label">April 9, 2026</span>
-                                <button class="btn btn-primary add-res-btn hidden" id="add-res-btn" style="width:100%; margin-top:16px; font-weight: 700;">+ New Reservation</button>
+                        <div class="time-selection-wrapper">
+                            <label style="display:block; font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:8px;">Session Start Time</label>
+                            <input type="time" class="input-field" id="booking-time" value="08:00">
+                        </div>
+
+                        <!-- OT Warning (Active Mockup) -->
+                        <div id="ot-warning" class="ot-warning-container hidden">
+                            <div class="warning-icon">⚠️</div>
+                            <div class="warning-text">
+                                <strong>Overtime Permit Required</strong><br>
+                                Supervisor authorization needed for post-17:00 sessions.
                             </div>
-                            <div class="agenda-list" id="agenda-list"></div>
-                            <div class="quick-tips glass">
-                                <strong>💡 Protocol Tip:</strong>
-                                <p>Double-check your buffer volumes before starting mass spec runs.</p>
-                            </div>
-                        </aside>
+                        </div>
+
+                        <button class="btn-primary" style="width:100%; margin-top:12px;">Initiate Protocol Reservation</button>
                     </div>
+                </section>
+
+                <!-- Small Stat Bento Cards -->
+                <div class="bento-card" style="grid-column: span 3;">
+                    <div class="card-label">Active Users</div>
+                    <div class="mono" style="font-size:48px; font-weight:800;">12</div>
+                    <div style="font-size:12px; color:var(--success); font-weight:600;">↑ 2 from last hour</div>
+                </div>
+                <div class="bento-card" style="grid-column: span 4;">
+                    <div class="card-label">Resource Load</div>
+                    <div style="height:40px; width:100%; background:var(--bg-surface-elevated); border-radius:4px; margin-top:12px; overflow:hidden;">
+                        <div style="height:100%; width:74%; background:linear-gradient(90deg, var(--accent), #00a3ff); box-shadow:0 0 15px var(--accent-glow)"></div>
+                    </div>
+                    <div class="mono" style="margin-top:8px; font-size:12px; text-align:right;">74% UTILIZATION</div>
                 </div>
 
-                <!-- Media View -->
-                <div id="media-view" class="hidden">
-                    <div class="view-header">
-                        <div class="header-content">
-                            <h2>Media Inventory</h2>
-                            <p class="subtitle">Track and manage cell culture media and supplements.</p>
-                        </div>
-                        <button class="btn btn-primary" id="add-media-btn">+ Add Media</button>
+                <!-- Module 2: Admin-Locked Inventory -->
+                <section class="bento-card inventory-module">
+                    <div class="card-label">
+                        <svg width="14" height="14" fill="var(--text-muted)" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z"/></svg>
+                        Administrative Inventory Management
                     </div>
-                    <div class="maintenance-grid" id="media-grid"></div>
-                </div>
 
-                <!-- Reagents View -->
-                <div id="reagents-view" class="hidden">
-                    <div class="view-header">
-                        <div class="header-content">
-                            <h2>Chemicals & Reagents</h2>
-                            <p class="subtitle">Stock levels of buffers, chemicals, and laboratory reagents.</p>
-                        </div>
-                        <button class="btn btn-primary" id="add-reagent-btn">+ Add Reagent</button>
+                    <div class="tabs-header">
+                        <div class="tab-trigger active" data-tab="media">Media</div>
+                        <div class="tab-trigger" data-tab="reagents">Reagents</div>
+                        <div class="tab-trigger" data-tab="supplies">Supplies</div>
                     </div>
-                    <div class="maintenance-grid" id="reagents-grid"></div>
-                </div>
 
-                <!-- Supplies View -->
-                <div id="supplies-view" class="hidden">
-                    <div class="view-header">
-                        <div class="header-content">
-                            <h2>Supplies & Materials</h2>
-                            <p class="subtitle">Manage lab consumables, tools, hardware, and safety items.</p>
+                    <div class="inventory-content locked-blur" id="inventory-lists">
+                        <!-- Media Table -->
+                        <div id="media-list">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Culture Media</th>
+                                        <th>Supplier</th>
+                                        <th>Date of Autoclave</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>DMEM + 10% FBS</td>
+                                        <td>LifeTech</td>
+                                        <td>2026-04-10</td>
+                                        <td style="color:var(--success)">Sterile</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LB Broth (Miller)</td>
+                                        <td>HiMedia</td>
+                                        <td>2026-04-08</td>
+                                        <td style="color:var(--warning)">Expiring</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <button class="btn btn-primary" id="add-supply-btn">+ Add Supply</button>
-                    </div>
-                    <div class="maintenance-grid" id="supplies-grid"></div>
-                </div>
 
-                <!-- Maintenance View -->
-                <div id="maintenance-view" class="hidden">
-                    <div class="view-header">
-                        <div class="header-content">
-                            <h2>Infrastructure Status</h2>
-                            <p class="subtitle">Real-time status of ME4PH Laboratory hardware and systems.</p>
+                        <!-- Reagents Table (Hidden) -->
+                        <div id="reagents-list" class="hidden">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Chemical</th>
+                                        <th>CAS No.</th>
+                                        <th>Conc.</th>
+                                        <th>Safety</th>
+                                        <th>MSDS</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="mono">
+                                    <tr>
+                                        <td>Trypsin-EDTA</td>
+                                        <td>9002-07-7</td>
+                                        <td>0.25%</td>
+                                        <td>Grade A</td>
+                                        <td><a href="#" class="link-cyan">View PDF</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Methanol</td>
+                                        <td>67-56-1</td>
+                                        <td>99.9%</td>
+                                        <td>Grade S</td>
+                                        <td><a href="#" class="link-cyan">View PDF</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <button class="btn btn-primary" id="report-issue-btn">+ Report Issue</button>
-                    </div>
-                    <div class="maintenance-grid" id="maintenance-grid"></div>
-                </div>
 
-                <!-- Reports View -->
-                <div id="reports-view" class="hidden">
-                    <div class="reports-dashboard">
-                        <div class="report-filters">
-                            <button class="filter-btn active" data-period="yesterday">Yesterday</button>
-                            <button class="filter-btn" data-period="week">Last 7 Days</button>
-                            <button class="filter-btn" data-period="month">This Month</button>
-                        </div>
-                        <div class="report-summary-cards">
-                            <div class="report-card glass"><span>Total Sessions</span><h2 id="report-total-sessions">0</h2></div>
-                            <div class="report-card glass"><span>Active Resource</span><h2 id="report-top-resource">—</h2></div>
-                            <div class="report-card glass"><span>Active Student</span><h2 id="report-top-student">—</h2></div>
-                        </div>
-                        <button class="btn btn-export" id="copy-audit-btn" style="background: #238636; margin-top: 20px;">📋 Copy Audit Log</button>
-                        <div class="report-table-container glass" style="margin-top: 20px;">
-                            <table class="report-table">
-                                <thead><tr><th>Date</th><th>Student</th><th>Resource</th><th>Time</th><th>Purpose</th></tr></thead>
-                                <tbody id="report-table-body"></tbody>
+                        <!-- Supplies Table (Hidden) -->
+                        <div id="supplies-list" class="hidden">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Catalog #</th>
+                                        <th>Stock Level</th>
+                                        <th>Threshold</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="mono">
+                                    <tr>
+                                        <td>Nitrile Gloves (M)</td>
+                                        <td>C-9920-F</td>
+                                        <td>42 boxes</td>
+                                        <td>20</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Filter Tips (200uL)</td>
+                                        <td>FT-200-S</td>
+                                        <td class="low-stock">4 racks</td>
+                                        <td>10</td>
+                                    </tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
+
+                    <!-- Supervisor Access Gate -->
+                    <div class="lock-overlay" id="access-gate">
+                        <div class="login-modal">
+                            <div class="lock-shield">🛡️</div>
+                            <h3>Supervisor Access Only</h3>
+                            <p>Administrative authentication is required to view and modify inventory assets.</p>
+                            <input type="password" id="supervisor-pass" class="input-field" style="width:100%; text-align:center; margin-bottom:16px;" placeholder="••••••••">
+                            <button class="btn-primary" style="width:100%" id="auth-btn">Unlock Records</button>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="bento-card" style="grid-column: span 3;">
+                    <div class="card-label">Safety Alerts</div>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div style="padding:12px; background:rgba(239, 68, 68, 0.1); border-left:3px solid var(--danger); font-size:12px;">
+                            <strong>Gas Pressure Low:</strong> Tank CO2-04
+                        </div>
+                    </div>
                 </div>
-            </section>
+                
+                <div class="bento-card" style="grid-column: span 2;">
+                    <div class="card-label">Weather</div>
+                    <div class="mono" style="font-size:32px;">28°C</div>
+                    <div style="font-size:12px; color:var(--text-muted);">UPLB Campus</div>
+                </div>
+            </div>
         </main>
     </div>
 
-    <!-- Modals -->
-    <div id="booking-modal" class="modal-overlay">
-        <div class="modal-content glass">
-            <header class="modal-header"><h2>Book Lab Resource</h2><button class="close-btn" id="close-modal">&times;</button></header>
-            <form id="booking-form">
-                <div class="form-group"><label>Selected Date</label><input type="text" id="date-display" readonly></div>
-                <div class="form-group"><label>Full Name</label><input type="text" id="student-name" required></div>
-                <div class="form-group"><label>Equipment</label><input type="text" id="resource-input" required></div>
-                <div class="form-row"><div id="start-time-picker"></div><div id="end-time-picker"></div></div>
-                <div id="ot-warning" class="ot-warning hidden"><p>⚠️ OT Protocol Required</p></div>
-                <textarea id="experiment-note" placeholder="Purpose..."></textarea>
-                <div class="modal-actions"><button type="submit" class="btn btn-primary">Confirm</button></div>
-            </form>
-        </div>
-    </div>
+    <div id="toast-container" style="position:fixed; bottom:32px; right:32px; z-index:1000;"></div>
 
-    <div id="auth-modal" class="modal-overlay">
-        <div class="modal-content glass" style="max-width: 400px; text-align: center;">
-            <h2 style="color: var(--accent);">Supervisor Access</h2>
-            <input type="password" id="auth-password" placeholder="Password" style="margin: 20px 0; text-align: center;">
-            <div class="modal-actions" style="justify-content: center;"><button id="confirm-auth" class="btn btn-primary">Authorize</button></div>
-        </div>
-    </div>
-
-    <div id="toast-container" class="toast-container"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=2100"></script>
+    <script src="app.js"></script>
 </body>
 </html>
