@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=900">
+    <link rel="stylesheet" href="styles.css?v=1000">
 </head>
 
 <body class="dark-theme">
@@ -20,7 +20,7 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <span class="logo-icon">M</span>
-                    <span class="logo-text">ME4PH <span class="accent">Lab</span></span>
+                    <span class="logo-text">ME4PH <span class="accent">Lab Scheduler</span></span>
                 </div>
             </div>
             <nav class="sidebar-nav">
@@ -176,7 +176,7 @@
                                     <span class="icon">📋</span>
                                 </div>
                                 <span class="agenda-date" id="agenda-date-label">April 9, 2026</span>
-                                <button class="btn btn-primary add-res-btn hidden" id="add-res-btn" style="width:100%; margin-top:16px; font-weight: 700;">+ Secure Resource</button>
+                                <button class="btn btn-primary add-res-btn hidden" id="add-res-btn" style="width:100%; margin-top:16px; font-weight: 700;">+ New Reservation</button>
                             </div>
                             <div class="agenda-list" id="agenda-list">
                                 <!-- JS will populate agenda items here -->
@@ -197,7 +197,7 @@
                             <h2>Media Inventory</h2>
                             <p class="subtitle">Track and manage cell culture media and supplements.</p>
                         </div>
-                        <button class="btn btn-primary" id="add-media-btn">+ Log New Media</button>
+                        <button class="btn btn-primary" id="add-media-btn">+ Add Media</button>
                     </div>
                     <div class="maintenance-grid" id="media-grid"></div>
                 </div>
@@ -208,7 +208,7 @@
                             <h2>Chemicals &amp; Reagents</h2>
                             <p class="subtitle">Stock levels of buffers, chemicals, and laboratory reagents.</p>
                         </div>
-                        <button class="btn btn-primary" id="add-reagent-btn">+ Log New Reagent</button>
+                        <button class="btn btn-primary" id="add-reagent-btn">+ Add Reagent</button>
                     </div>
                     <div class="maintenance-grid" id="reagents-grid"></div>
                 </div>
@@ -295,7 +295,7 @@
     <div id="booking-modal" class="modal-overlay">
         <div class="modal-content glass">
             <header class="modal-header">
-                <h2>Secure Lab Resource</h2>
+                <h2>Book Lab Resource</h2>
                 <button class="close-btn" id="close-modal">&times;</button>
             </header>
             <form id="booking-form">
@@ -604,7 +604,7 @@
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=900"></script>
+    <script src="app.js?v=1000"></script>
 </body>
 
 </html>
