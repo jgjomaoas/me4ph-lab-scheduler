@@ -9,8 +9,8 @@
         content="State-of-the-art laboratory equipment scheduling and protocol management system for ME4PH Lab.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=1300">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=2000">
 </head>
 
 <body class="dark-theme">
@@ -117,9 +117,7 @@
                                 <h2 class="analytics-section-title">Equipment Utilization</h2>
                                 <span class="badge">Weekly Report</span>
                             </div>
-                            <div class="analytics-container" id="analytics-container">
-                                <!-- JS will populate cards here -->
-                            </div>
+                            <div class="analytics-container" id="analytics-container"></div>
                         </div>
                         
                         <div class="activity-feed glass">
@@ -127,10 +125,7 @@
                                 <h2 class="analytics-section-title">Session Feed</h2>
                                 <span class="pulse-dot green"></span>
                             </div>
-                            <div class="feed-content" id="recent-activity-feed">
-                                <!-- JS will populate activity items here -->
-                                <div class="empty-feed">Analyzing past logs...</div>
-                            </div>
+                            <div class="feed-content" id="recent-activity-feed"></div>
                         </div>
                     </div>
 
@@ -145,30 +140,18 @@
                     </div>
 
                     <div class="schedule-layout">
-                        <!-- Calendar Container -->
                         <div class="calendar-wrapper glass">
                             <div class="calendar-nav">
                                 <button class="nav-btn" id="prev-month">❮</button>
                                 <h2 id="month-year-display">April 2026</h2>
                                 <button class="nav-btn" id="next-month">❯</button>
                             </div>
-
                             <div class="calendar-header">
-                                <div>Sun</div>
-                                <div>Mon</div>
-                                <div>Tue</div>
-                                <div>Wed</div>
-                                <div>Thu</div>
-                                <div>Fri</div>
-                                <div>Sat</div>
+                                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
                             </div>
-
-                            <div class="calendar-grid" id="calendar-grid">
-                                <!-- JS will populate day-cells here -->
-                            </div>
+                            <div class="calendar-grid" id="calendar-grid"></div>
                         </div>
 
-                        <!-- Agenda Sidebar -->
                         <aside class="agenda-sidebar glass">
                             <div class="agenda-header">
                                 <div class="agenda-title-row">
@@ -178,11 +161,7 @@
                                 <span class="agenda-date" id="agenda-date-label">April 9, 2026</span>
                                 <button class="btn btn-primary add-res-btn hidden" id="add-res-btn" style="width:100%; margin-top:16px; font-weight: 700;">+ New Reservation</button>
                             </div>
-                            <div class="agenda-list" id="agenda-list">
-                                <!-- JS will populate agenda items here -->
-                                <div class="empty-agenda">Select a date to view reservations.</div>
-                            </div>
-                            
+                            <div class="agenda-list" id="agenda-list"></div>
                             <div class="quick-tips glass">
                                 <strong>💡 Protocol Tip:</strong>
                                 <p>Double-check your buffer volumes before starting mass spec runs.</p>
@@ -191,6 +170,7 @@
                     </div>
                 </div>
 
+                <!-- Media View -->
                 <div id="media-view" class="hidden">
                     <div class="view-header">
                         <div class="header-content">
@@ -202,10 +182,11 @@
                     <div class="maintenance-grid" id="media-grid"></div>
                 </div>
 
+                <!-- Reagents View -->
                 <div id="reagents-view" class="hidden">
                     <div class="view-header">
                         <div class="header-content">
-                            <h2>Chemicals &amp; Reagents</h2>
+                            <h2>Chemicals & Reagents</h2>
                             <p class="subtitle">Stock levels of buffers, chemicals, and laboratory reagents.</p>
                         </div>
                         <button class="btn btn-primary" id="add-reagent-btn">+ Add Reagent</button>
@@ -213,10 +194,11 @@
                     <div class="maintenance-grid" id="reagents-grid"></div>
                 </div>
 
+                <!-- Supplies View -->
                 <div id="supplies-view" class="hidden">
                     <div class="view-header">
                         <div class="header-content">
-                            <h2>Supplies &amp; Materials</h2>
+                            <h2>Supplies & Materials</h2>
                             <p class="subtitle">Manage lab consumables, tools, hardware, and safety items.</p>
                         </div>
                         <button class="btn btn-primary" id="add-supply-btn">+ Add Supply</button>
@@ -224,6 +206,7 @@
                     <div class="maintenance-grid" id="supplies-grid"></div>
                 </div>
 
+                <!-- Maintenance View -->
                 <div id="maintenance-view" class="hidden">
                     <div class="view-header">
                         <div class="header-content">
@@ -232,10 +215,7 @@
                         </div>
                         <button class="btn btn-primary" id="report-issue-btn">+ Report Issue</button>
                     </div>
-
-                    <div class="maintenance-grid" id="maintenance-grid">
-                        <!-- JS will populate status-cards here -->
-                    </div>
+                    <div class="maintenance-grid" id="maintenance-grid"></div>
                 </div>
 
                 <!-- Reports View -->
@@ -246,365 +226,50 @@
                             <button class="filter-btn" data-period="week">Last 7 Days</button>
                             <button class="filter-btn" data-period="month">This Month</button>
                         </div>
-
                         <div class="report-summary-cards">
-                            <div class="report-card glass">
-                                <span>Total Sessions</span>
-                                <h2 id="report-total-sessions">0</h2>
-                            </div>
-                            <div class="report-card glass">
-                                <span>Active Resource</span>
-                                <h2 id="report-top-resource">—</h2>
-                            </div>
-                            <div class="report-card glass">
-                                <span>Active Student</span>
-                                <h2 id="report-top-student">—</h2>
-                            </div>
+                            <div class="report-card glass"><span>Total Sessions</span><h2 id="report-total-sessions">0</h2></div>
+                            <div class="report-card glass"><span>Active Resource</span><h2 id="report-top-resource">—</h2></div>
+                            <div class="report-card glass"><span>Active Student</span><h2 id="report-top-student">—</h2></div>
                         </div>
-
-                        <div class="export-section" style="display: flex; justify-content: flex-end;">
-                            <button class="btn btn-export" id="copy-audit-btn" style="background: #238636;">
-                                <span>📋</span> Copy Audit Log to Clipboard
-                            </button>
-                        </div>
-
-                        <div class="report-table-container glass">
+                        <button class="btn btn-export" id="copy-audit-btn" style="background: #238636; margin-top: 20px;">📋 Copy Audit Log</button>
+                        <div class="report-table-container glass" style="margin-top: 20px;">
                             <table class="report-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Student</th>
-                                        <th>Resource</th>
-                                        <th>Time</th>
-                                        <th>Purpose</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="report-table-body">
-                                    <!-- Rows injected via JS -->
-                                </tbody>
+                                <thead><tr><th>Date</th><th>Student</th><th>Resource</th><th>Time</th><th>Purpose</th></tr></thead>
+                                <tbody id="report-table-body"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-
             </section>
         </main>
     </div>
 
-    <!-- Booking Modal -->
+    <!-- Modals -->
     <div id="booking-modal" class="modal-overlay">
         <div class="modal-content glass">
-            <header class="modal-header">
-                <h2>Book Lab Resource</h2>
-                <button class="close-btn" id="close-modal">&times;</button>
-            </header>
+            <header class="modal-header"><h2>Book Lab Resource</h2><button class="close-btn" id="close-modal">&times;</button></header>
             <form id="booking-form">
-                <div class="form-group">
-                    <label for="date-display">Selected Date</label>
-                    <input type="text" id="date-display" readonly class="readonly-input">
-                </div>
-                <div class="form-group">
-                    <label for="student-name">Full Name</label>
-                    <input type="text" id="student-name" placeholder="Enter your full name" required>
-                </div>
-                <div class="form-group">
-                    <label for="resource-input">Equipment / Bench Space</label>
-                    <input type="text" id="resource-input" autocomplete="off"
-                        placeholder="e.g. PCR Machine, Bench 4, Flow Cytometer" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Time In</label>
-                        <div class="time-picker" id="start-time-picker">
-                            <!-- JS builds the dropdowns here -->
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Time Out</label>
-                        <div class="time-picker" id="end-time-picker">
-                            <!-- JS builds the dropdowns here -->
-                        </div>
-                    </div>
-                </div>
-                <!-- OT Protocol Reminder -->
-                <div id="ot-warning" class="ot-warning hidden">
-                    <p>⚠️ <strong>OT Protocol Required</strong>: Your requested time extends beyond standard hours.
-                        Please ensure a supervisor is present and you possess a valid OT permit.</p>
-                </div>
-                <div class="form-group">
-                    <label for="experiment-note">Purpose of Use</label>
-                    <textarea id="experiment-note" placeholder="Briefly describe the experiment protocol..."></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" id="cancel-booking">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="confirm-booking">Confirm Reservation</button>
-                </div>
+                <div class="form-group"><label>Selected Date</label><input type="text" id="date-display" readonly></div>
+                <div class="form-group"><label>Full Name</label><input type="text" id="student-name" required></div>
+                <div class="form-group"><label>Equipment</label><input type="text" id="resource-input" required></div>
+                <div class="form-row"><div id="start-time-picker"></div><div id="end-time-picker"></div></div>
+                <div id="ot-warning" class="ot-warning hidden"><p>⚠️ OT Protocol Required</p></div>
+                <textarea id="experiment-note" placeholder="Purpose..."></textarea>
+                <div class="modal-actions"><button type="submit" class="btn btn-primary">Confirm</button></div>
             </form>
         </div>
     </div>
 
-    <!-- Media Logging Modal -->
-    <div id="media-modal" class="modal-overlay">
-        <div class="modal-content glass">
-            <header class="modal-header">
-                <h2 id="media-modal-title">Log Laboratory Media</h2>
-                <button class="close-btn" id="close-media-modal">&times;</button>
-            </header>
-            <form id="media-form">
-                <input type="hidden" id="media-edit-id">
-                <div class="form-group">
-                    <label for="media-name">Media Name / Type</label>
-                    <input type="text" id="media-name" placeholder="e.g. DMEM High Glucose" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="media-icon">Icon</label>
-                        <select id="media-icon">
-                            <option value="🧫">🧫 Cell Culture</option>
-                            <option value="🧪">🧪 Tube / Sample</option>
-                            <option value="🧴">🧴 Bottle</option>
-                            <option value="❄️">❄️ Cold Storage</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="media-status">Supply Status</label>
-                        <select id="media-status">
-                            <option value="In Stock">In Stock</option>
-                            <option value="Low Stock">Low Stock</option>
-                            <option value="Almost Consumed">Almost Consumed</option>
-                            <option value="Out of Stock">Out of Stock</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="media-supplier">Supplier</label>
-                    <input type="text" id="media-supplier" placeholder="e.g. Thermo Fisher, Gibco" required>
-                </div>
-                <div class="form-group">
-                    <label for="media-notes">Batch / Expiry / Notes</label>
-                    <textarea id="media-notes"
-                        placeholder="Batch number or special handling instructions..."></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" id="cancel-media">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="media-submit-btn">Log Media</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Reagents Logging Modal -->
-    <div id="reagents-modal" class="modal-overlay">
-        <div class="modal-content glass">
-            <header class="modal-header">
-                <h2 id="reagents-modal-title">Log Laboratory Reagent</h2>
-                <button class="close-btn" id="close-reagents-modal">&times;</button>
-            </header>
-            <form id="reagents-form">
-                <input type="hidden" id="reagents-edit-id">
-                <div class="form-group">
-                    <label for="reagent-name">Reagent Name</label>
-                    <input type="text" id="reagent-name" placeholder="e.g. PBS 10X Buffer" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="reagent-icon">Icon</label>
-                        <select id="reagent-icon">
-                            <option value="🧪">🧪 Tube</option>
-                            <option value="🧴">🧴 Bottle</option>
-                            <option value="⚗️">⚗️ Chemicals</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="reagent-status">Supply Status</label>
-                        <select id="reagent-status">
-                            <option value="In Stock">In Stock</option>
-                            <option value="Low Stock">Low Stock</option>
-                            <option value="Almost Consumed">Almost Consumed</option>
-                            <option value="Out of Stock">Out of Stock</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="reagent-supplier">Supplier</label>
-                    <input type="text" id="reagent-supplier" placeholder="e.g. Sigma-Aldrich, Merck" required>
-                </div>
-                <div class="form-group">
-                    <label for="reagent-notes">Technical Notes</label>
-                    <textarea id="reagent-notes" placeholder="Storage conditions or concentration info..."></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" id="cancel-reagent">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="reagents-submit-btn">Log Reagent</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Supplies & Materials Modal -->
-    <div id="supplies-modal" class="modal-overlay">
-        <div class="modal-content glass">
-            <header class="modal-header">
-                <h2 id="supplies-modal-title">Add Supply / Material</h2>
-                <button class="close-btn" id="close-supplies-modal">&times;</button>
-            </header>
-            <form id="supplies-form">
-                <input type="hidden" id="supplies-edit-id">
-                <div class="form-group">
-                    <label for="supply-name">Item Name / Description</label>
-                    <input type="text" id="supply-name" placeholder="e.g. Nitrile Gloves (Medium)" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="supply-category">Category</label>
-                        <select id="supply-category">
-                            <option value="Consumables">Consumables</option>
-                            <option value="Hardware">Hardware</option>
-                            <option value="Tools">Tools</option>
-                            <option value="Safety">Safety</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="supply-quantity">Quantity / Unit</label>
-                        <input type="text" id="supply-quantity" placeholder="e.g. 100 pcs, 5 L">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="supply-unit-cost">Unit Cost (&#8369;)</label>
-                        <input type="number" id="supply-unit-cost" placeholder="0.00" min="0" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="supply-supplier">Supplier Name</label>
-                        <input type="text" id="supply-supplier" placeholder="e.g. Lab Depot PH">
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" id="cancel-supply">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="supplies-submit-btn">Add to Inventory</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Maintenance Request Modal -->
-    <div id="maintenance-modal" class="modal-overlay">
-        <div class="modal-content glass">
-            <header class="modal-header">
-                <h2 id="maintenance-modal-title">Equipment Status Report</h2>
-                <button class="close-btn" id="close-maintenance-modal">&times;</button>
-            </header>
-            <form id="maintenance-form">
-                <input type="hidden" id="maintenance-edit-id">
-                <div class="form-group">
-                    <label for="maint-name">Equipment / System Name</label>
-                    <input type="text" id="maint-name" placeholder="e.g. Centrifuge X-9" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="maint-icon">Representative Icon</label>
-                        <select id="maint-icon">
-                            <option value="🔬">🔬 Microscope</option>
-                            <option value="🧬">🧬 PCR / DNA</option>
-                            <option value="⚗️">⚗️ Analytical</option>
-                            <option value="❄️">❄️ Cold Storage</option>
-                            <option value="💻">💻 Compute System</option>
-                            <option value="🛠️">🛠️ Other Hardware</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="maint-status">Current Status</label>
-                        <select id="maint-status">
-                            <option value="online">Online / Nominal</option>
-                            <option value="offline">Offline / Down</option>
-                            <option value="maintenance">Under Maintenance</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="maint-supplier">Supplier / Maintenance Provider</label>
-                    <input type="text" id="maint-supplier" placeholder="e.g. Thermo Fisher, Agilent, Internal"
-                        required>
-                </div>
-                <div class="form-group">
-                    <label for="maint-notes">Technical Notes</label>
-                    <textarea id="maint-notes"
-                        placeholder="Describe the current status or reported issue..."></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" id="cancel-maintenance">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="maintenance-submit-btn">Update System Status</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Deletion Confirmation Modal -->
-    <div id="confirm-modal" class="modal-overlay">
-        <div class="modal-content glass confirm-box">
-            <header class="modal-header">
-                <h2>Confirm Deletion</h2>
-            </header>
-            <div class="confirm-body">
-                <p id="confirm-message">Are you sure you want to remove this equipment from the diagnostics log?</p>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" id="confirm-cancel">Keep Equipment</button>
-                <button type="button" class="btn btn-primary btn-danger" id="confirm-yes">Yes, Remove</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Export/Share Modal -->
-    <div id="export-modal" class="modal-overlay">
-        <div class="modal-content glass" style="max-width: 500px;">
-            <div class="modal-header">
-                <h2>Ready to Export</h2>
-                <button class="close-btn" id="close-export-modal">&times;</button>
-            </div>
-            <div class="export-content">
-                <p class="subtitle" style="font-size: 13px; opacity: 0.8; margin-bottom: 15px;">
-                    An automatic download was attempted. If it failed, use the tools below:
-                </p>
-                <textarea id="csv-preview-area" class="csv-preview" readonly></textarea>
-                <div class="modal-actions" style="margin-top: 20px;">
-                    <button class="btn btn-copy" id="copy-csv-btn">📋 Copy to Clipboard</button>
-                    <button class="btn btn-share" id="share-csv-btn">📤 Share File</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Supervisor Authorization Modal -->
     <div id="auth-modal" class="modal-overlay">
         <div class="modal-content glass" style="max-width: 400px; text-align: center;">
-            <div class="modal-header" style="justify-content: center;">
-                <h2 style="color: var(--accent);">Supervisor Access</h2>
-            </div>
-            <div class="auth-body" style="padding: 10px 0 20px;">
-                <p class="subtitle" style="margin-bottom: 24px;">This action is protected. Please enter the laboratory supervisor password to proceed.</p>
-                <div class="form-group" style="position: relative;">
-                    <input type="password" id="auth-password" placeholder="Enter Supervisor Password" style="text-align: center; letter-spacing: 4px; font-size: 18px; padding-right: 48px;">
-                    <button type="button" id="toggle-auth-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 18px; cursor: pointer; opacity: 0.6; padding: 5px;" title="Toggle Password Visibility">👁️</button>
-                </div>
-                <div id="auth-error" class="hidden" style="color: #f85149; font-size: 13px; margin-top: -10px; margin-bottom: 10px; font-weight: 600;">
-                    Invalid password. Access denied.
-                </div>
-            </div>
-            <div class="modal-actions" style="justify-content: center;">
-                <button type="button" class="btn btn-secondary" id="cancel-auth">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirm-auth">Authorize</button>
-            </div>
+            <h2 style="color: var(--accent);">Supervisor Access</h2>
+            <input type="password" id="auth-password" placeholder="Password" style="margin: 20px 0; text-align: center;">
+            <div class="modal-actions" style="justify-content: center;"><button id="confirm-auth" class="btn btn-primary">Authorize</button></div>
         </div>
     </div>
 
-    <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
-
-    <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=1300"></script>
+    <script src="app.js?v=2000"></script>
 </body>
-
 </html>
