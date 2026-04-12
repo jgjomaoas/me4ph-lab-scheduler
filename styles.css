@@ -88,22 +88,22 @@ body::before {
 }
 
 .logo-text {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 800;
     letter-spacing: -1px;
 }
 
 .logo-icon {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     background: linear-gradient(135deg, var(--accent), #3b82f6);
-    border-radius: 12px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-size: 20px;
-    box-shadow: 0 8px 20px var(--accent-glow);
+    font-size: 22px;
+    box-shadow: 0 10px 25px var(--accent-glow);
 }
 
 .nav-item {
@@ -116,19 +116,20 @@ body::before {
     cursor: pointer;
     transition: var(--transition);
     color: var(--text-secondary);
-    font-weight: 600;
+    font-weight: 700; /* Increased weight */
+    font-size: 15px; /* Increased size */
 }
 
 .nav-item:hover {
     background: var(--glass-bg);
     color: var(--text-primary);
-    transform: translateX(5px);
+    transform: translateX(8px);
 }
 
 .nav-item.active {
     background: var(--accent);
     color: #fff;
-    box-shadow: 0 10px 25px var(--accent-glow);
+    box-shadow: 0 12px 30px var(--accent-glow);
 }
 
 /* Main Content Area */
@@ -140,8 +141,8 @@ body::before {
 }
 
 .main-header {
-    height: 100px;
-    padding: 0 48px;
+    height: 110px; /* Taller header */
+    padding: 0 56px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -149,16 +150,17 @@ body::before {
 }
 
 .main-header h1 {
-    font-size: 32px;
+    font-size: 38px; /* Larger, more impactful */
     font-weight: 800;
-    letter-spacing: -1px;
+    letter-spacing: -1.5px;
 }
 
 .time-display {
     font-family: 'Outfit', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 28px; /* Larger clock */
+    font-weight: 800;
     color: var(--accent);
+    letter-spacing: -0.5px;
 }
 
 .header-theme-toggle {
@@ -218,17 +220,18 @@ body::before {
 }
 
 .stat-label {
-    font-size: 13px;
+    font-size: 14px; /* Increased from 13px */
     font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
 }
 
 .stat-value {
-    font-size: 36px;
+    font-size: 42px; /* Increased from 36px */
     font-weight: 800;
-    margin-top: 4px;
+    margin-top: 6px;
+    letter-spacing: -1px;
 }
 
 /* Analytics Row */
