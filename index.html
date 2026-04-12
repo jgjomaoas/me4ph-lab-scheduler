@@ -10,10 +10,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=400">
+    <link rel="stylesheet" href="styles.css?v=500">
 </head>
 
-<body class="dark-theme">
+<body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
@@ -26,27 +26,21 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li class="nav-item active" id="nav-dashboard" data-view="schedule-view">
-                        <span class="icon">📅</span>
                         <span class="label">SCHEDULE</span>
                     </li>
                     <li class="nav-item" id="nav-media" data-view="media-view">
-                        <span class="icon">🥣</span>
                         <span class="label">MEDIA</span>
                     </li>
                     <li class="nav-item" id="nav-reagents" data-view="reagents-view">
-                        <span class="icon">🧪</span>
                         <span class="label">REAGENTS</span>
                     </li>
                     <li class="nav-item" id="nav-supplies" data-view="supplies-view">
-                        <span class="icon">📦</span>
                         <span class="label">SUPPLIES & MATERIALS</span>
                     </li>
                     <li class="nav-item" id="nav-maintenance" data-view="maintenance-view">
-                        <span class="icon">🛠️</span>
                         <span class="label">UNDER MAINTENANCE</span>
                     </li>
                     <li class="nav-item" id="nav-reports" data-view="reports-view">
-                        <span class="icon">📜</span>
                         <span class="label">AUDIT REPORTS</span>
                     </li>
                 </ul>
@@ -69,10 +63,6 @@
                 <div class="header-right">
                     <div class="time-container">
                         <div class="time-display" id="digital-clock">03:55:00 PM</div>
-                        <button class="header-theme-toggle" id="header-theme-toggle" title="Toggle Laboratory Theme">
-                            <span class="icon">🌙</span>
-                            <span class="label">Midnight Mode</span>
-                        </button>
                     </div>
                 </div>
             </header>
@@ -81,29 +71,25 @@
                 <div id="schedule-view">
                     <!-- Live Lab Overview Stats -->
                     <div class="stats-overview-grid">
-                        <div class="stat-card glass animate-slide-up">
-                            <div class="stat-icon" style="background: rgba(0, 210, 255, 0.1); color: var(--accent);">📊</div>
+                        <div class="stat-card animate-slide-up">
                             <div class="stat-info">
                                 <span class="stat-label">Today's Sessions</span>
                                 <h2 class="stat-value" id="stat-today-bookings">0</h2>
                             </div>
                         </div>
-                        <div class="stat-card glass animate-slide-up" style="animation-delay: 0.1s;">
-                            <div class="stat-icon" style="background: rgba(35, 134, 54, 0.1); color: #3fb950;">⚡</div>
+                        <div class="stat-card animate-slide-up" style="animation-delay: 0.1s;">
                             <div class="stat-info">
                                 <span class="stat-label">Active Resources</span>
                                 <h2 class="stat-value" id="stat-active-resources">0</h2>
                             </div>
                         </div>
-                        <div class="stat-card glass animate-slide-up" style="animation-delay: 0.2s;">
-                            <div class="stat-icon" style="background: rgba(210, 153, 34, 0.1); color: var(--warning);">🕒</div>
+                        <div class="stat-card animate-slide-up" style="animation-delay: 0.2s;">
                             <div class="stat-info">
                                 <span class="stat-label">Next Slot</span>
                                 <h2 class="stat-value" id="stat-next-slot">Available</h2>
                             </div>
                         </div>
-                        <div class="stat-card glass animate-slide-up" style="animation-delay: 0.3s;">
-                            <div class="stat-icon" style="background: rgba(248, 81, 73, 0.1); color: var(--danger);">🛠️</div>
+                        <div class="stat-card animate-slide-up" style="animation-delay: 0.3s;">
                             <div class="stat-info">
                                 <span class="stat-label">Offline Systems</span>
                                 <h2 class="stat-value" id="stat-offline-count">0</h2>
@@ -604,7 +590,7 @@
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=400"></script>
+    <script src="app.js?v=500"></script>
 </body>
 
 </html>

@@ -33,7 +33,6 @@ let state = {
         { name: "Trypsin-EDTA", icon: "🧪", status: "Low Stock", supplier: "Corning", notes: "Order more for next month." }
     ],
     supplies: [],
-    theme: 'dark',
     isAuthenticated: false,
     pendingAction: null
 };
@@ -380,7 +379,6 @@ async function init() {
         await fetchFullState();
     }
 
-    applyTheme(state.theme);
     renderCalendar();
     renderMaintenance();
     renderInventory('media');
@@ -419,24 +417,6 @@ function updateStatus(text, type = 'success') {
     }
 }
 
-function applyTheme(theme) {
-    state.theme = theme;
-    document.body.classList.toggle('light-theme', theme === 'light');
-
-    const toggleBtn = document.getElementById('header-theme-toggle');
-    if (toggleBtn) {
-        const icon = toggleBtn.querySelector('.icon');
-        const label = toggleBtn.querySelector('.label');
-        if (theme === 'light') {
-            icon.textContent = '☀️';
-            label.textContent = 'Daylight Mode';
-        } else {
-            icon.textContent = '🌙';
-            label.textContent = 'Midnight Mode';
-        }
-    }
-    saveStateLocal();
-}
 
 function updateClock() {
     const now = new Date();
@@ -832,15 +812,6 @@ function setupEventListeners() {
     document.getElementById('add-supply-btn').addEventListener('click', () => resetModal('supplies'));
     document.getElementById('report-issue-btn').addEventListener('click', () => resetModal('maintenance'));
 
-    // Theme Toggle
-    const headerToggle = document.getElementById('header-theme-toggle');
-    if (headerToggle) {
-        headerToggle.addEventListener('click', () => {
-            const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
-            applyTheme(nextTheme);
-            showToast(`Laboratory switched to ${nextTheme === 'dark' ? 'Midnight' : 'Daylight'} mode`);
-        });
-    }
 
     // Reports Filter Buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
