@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=1000">
+    <link rel="stylesheet" href="styles.css?v=1100">
 </head>
 
 <body class="dark-theme">
@@ -81,28 +81,28 @@
                 <div id="schedule-view">
                     <!-- Live Lab Overview Stats -->
                     <div class="stats-overview-grid">
-                        <div class="stat-card glass animate-slide-up">
+                        <div class="stat-card animate-slide-up">
                             <div class="stat-icon" style="background: rgba(0, 210, 255, 0.1); color: var(--accent);">📊</div>
                             <div class="stat-info">
                                 <span class="stat-label">Today's Sessions</span>
                                 <h2 class="stat-value" id="stat-today-bookings">0</h2>
                             </div>
                         </div>
-                        <div class="stat-card glass animate-slide-up" style="animation-delay: 0.1s;">
+                        <div class="stat-card animate-slide-up" style="animation-delay: 0.1s;">
                             <div class="stat-icon" style="background: rgba(35, 134, 54, 0.1); color: #3fb950;">⚡</div>
                             <div class="stat-info">
                                 <span class="stat-label">Active Resources</span>
                                 <h2 class="stat-value" id="stat-active-resources">0</h2>
                             </div>
                         </div>
-                        <div class="stat-card glass animate-slide-up" style="animation-delay: 0.2s;">
+                        <div class="stat-card animate-slide-up" style="animation-delay: 0.2s;">
                             <div class="stat-icon" style="background: rgba(210, 153, 34, 0.1); color: var(--warning);">🕒</div>
                             <div class="stat-info">
                                 <span class="stat-label">Next Slot</span>
                                 <h2 class="stat-value" id="stat-next-slot">Available</h2>
                             </div>
                         </div>
-                        <div class="stat-card glass animate-slide-up" style="animation-delay: 0.3s;">
+                        <div class="stat-card animate-slide-up" style="animation-delay: 0.3s;">
                             <div class="stat-icon" style="background: rgba(248, 81, 73, 0.1); color: var(--danger);">🛠️</div>
                             <div class="stat-info">
                                 <span class="stat-label">Offline Systems</span>
@@ -239,7 +239,7 @@
                 </div>
 
                 <!-- Reports View -->
-                <div id="reports-view" class="view-section hidden">
+                <div id="reports-view" class="hidden">
                     <div class="reports-dashboard">
                         <div class="report-filters">
                             <button class="filter-btn active" data-period="yesterday">Yesterday</button>
@@ -604,7 +604,7 @@
 
     <!-- Supabase Client Library (must load before app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=1000"></script>
+    <script src="app.js?v=1100"></script>
 </body>
 
 </html>
