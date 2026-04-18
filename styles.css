@@ -45,7 +45,7 @@ body {
     color: var(--text-primary);
     font-family: var(--font-sans);
     line-height: 1.6;
-    min-height: 100vh;
+    overflow-y: auto;
 }
 
 .mono { font-family: var(--font-mono); font-size: 0.9em; letter-spacing: -0.5px; }
@@ -69,7 +69,6 @@ html, body {
     display: flex;
     min-height: 100vh;
     width: 100%;
-    background: var(--bg-main);
 }
 
 /* Glassmorphism Sidebar */
@@ -82,6 +81,10 @@ html, body {
     flex-direction: column;
     padding: 32px 16px;
     z-index: 100;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    flex-shrink: 0;
 }
 
 .sidebar-brand {
@@ -160,7 +163,7 @@ html, body {
 /* Bento Grid */
 .bento-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 4fr 8fr;
     grid-template-rows: auto auto;
     flex: 1;
     gap: 0;
