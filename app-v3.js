@@ -738,11 +738,13 @@ function updateReportsUI() {
         const isOT = b.isOT || (b.timeOut && (b.timeOut.includes('PM') && parseInt(b.timeOut) >= 5));
 
         tr.innerHTML = `
-            <td style="padding-left:24px; font-weight:700; color:var(--accent);">${b.date}</td>
-            <td style="font-weight:600;">${name}</td>
-            <td>${b.equipment}</td>
-            <td class="mono">${tIn} - ${tOut}</td>
-            <td style="padding-right:24px; color:var(--success); font-weight:700;">VERIFIED</td>
+            <td><span style="font-weight:700; color:var(--accent-core);">${b.date}</span></td>
+            <td style="font-weight:600; color:var(--text-stellar);">${name}</td>
+            <td style="color:var(--text-dim);">${b.equipment}</td>
+            <td class="mono" style="color:var(--text-dim);">${tIn} - ${tOut}</td>
+            <td style="text-align:right;">
+                <span class="chip" style="background:var(--glass-highlight); color:var(--accent-core); padding:6px 12px; border-radius:8px; font-size:10px; font-weight:800; border:1px solid var(--accent-glow);">VERIFIED</span>
+            </td>
         `;
         tableBody.appendChild(tr);
     });
