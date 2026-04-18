@@ -611,6 +611,7 @@ equipmentChips.forEach(chip => {
 // --- Initialization Wrapper ---
 document.addEventListener('DOMContentLoaded', () => {
     try {
+        migrateInventoryData();
         updateClock();
         setInterval(updateClock, 1000);
         handleOTCheck();
@@ -624,7 +625,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// --- Sidebar Navigation ---
+function migrateInventoryData() {
+    // Ensure all existing items have a supplier field
+    let updated = false;
+    for(let cat in state.inventory) {
+        state.inventory[cat].forEach(item => {
+            if(!item.supplier) {
+                item.supplier = 'N/A';
+                updated = true;
+            }
+        });
+    }
+    if(updated) {
+        localStorage.setItem('me4ph_inventory', JSON.stringify(state.inventory));
+    }
+}
 function initSidebar() {
     const navLinks = document.querySelectorAll('.nav-link');
     const dashboardStage = document.getElementById('dashboard-stage');
