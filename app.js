@@ -295,6 +295,7 @@ function selectDate(dateString, cellElement, isPast) {
     
     // Render Daily Timeline
     renderTimeline(dateString, isPast);
+    updateAnalytics();
 }
 
 function renderTimeline(dateString, isPast) {
