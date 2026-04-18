@@ -723,9 +723,9 @@ function updateReportsUI() {
         const isOT = parseInt(b.timeOut) > 17 || b.ampmOut === 'PM'; // Simple OT check
         tr.innerHTML = `
             <td style="padding-left:24px; font-weight:700; color:var(--accent);">${b.date}</td>
-            <td style="font-weight:600;">${b.student}</td>
+            <td style="font-weight:600;">${b.studentName || 'Unknown User'}</td>
             <td>${b.equipment}</td>
-            <td class="mono">${b.timeIn}${b.ampmIn} - ${b.timeOut}${b.ampmOut}</td>
+            <td class="mono">${b.timeIn} - ${b.timeOut}</td>
             <td><span class="chip" style="background:${isOT ? 'var(--accent-muted)' : 'transparent'}; border-color:${isOT ? 'var(--accent)' : 'var(--border)'}">${isOT ? 'OT PERMIT' : 'REGULAR'}</span></td>
             <td style="padding-right:24px; color:var(--success); font-weight:700;">VERIFIED</td>
         `;
