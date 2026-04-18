@@ -174,30 +174,20 @@ function updateAnalytics() {
             const card = document.createElement('div');
             card.style.cssText = `
                 background: var(--bg-surface-elevated); border: 1px solid var(--border);
-                padding: 16px; border-radius: 8px; display:flex; flex-direction:column; gap:12px;
-                border-top: 3px solid ${statusColor};
+                padding: 12px; border-radius: 4px; display:flex; flex-direction:column; gap:8px;
+                border-left: 4px solid ${statusColor};
             `;
             card.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:start;">
-                    <div>
-                        <div style="font-size:14px; font-weight:700; color:var(--text-primary);">${name}</div>
-                        <div style="font-size:10px; color:var(--text-muted);">Today's Sessions: ${data.count}</div>
-                    </div>
-                    <div style="padding:4px 8px; background:var(--bg-main); border-radius:4px; font-size:10px; font-weight:800; color:${statusColor}; border:1px solid ${statusColor}33;">
-                        ${intensity}% LOAD
-                    </div>
+                    <div style="font-size:12px; font-weight:700; color:var(--text-primary);">${name}</div>
+                    <div style="font-size:9px; font-weight:800; color:${statusColor}; opacity:0.8;">${intensity}%</div>
                 </div>
-                <div style="flex:1;">
-                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
-                        <span style="color:var(--text-secondary);">Daily Resource Load</span>
-                        <span style="color:var(--text-primary); font-weight:700;">${data.hours.toFixed(1)}h</span>
-                    </div>
-                    <div style="height:6px; background:var(--bg-main); border-radius:3px; overflow:hidden;">
-                        <div style="height:100%; width:${intensity}%; background:${statusColor}; box-shadow:0 0 10px ${statusColor}44;"></div>
-                    </div>
+                <div style="height:4px; background:var(--bg-main); border-radius:2px; overflow:hidden;">
+                    <div style="height:100%; width:${intensity}%; background:${statusColor};"></div>
                 </div>
-                <div style="font-size:10px; color:var(--text-muted); border-top:1px solid var(--border); padding-top:8px;">
-                    Current Researcher: <span style="color:var(--text-secondary); font-weight:600;">${data.lastUser}</span>
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted);">
+                    <span>${data.hours.toFixed(1)}h logged</span>
+                    <span>${data.lastUser}</span>
                 </div>
             `;
             statResourceGrid.appendChild(card);
@@ -299,7 +289,6 @@ function selectDate(dateString, cellElement, isPast) {
 }
 
 function renderTimeline(dateString, isPast) {
-    dailyTimeline.classList.remove('hidden');
     timelineDateLabel.textContent = `Daily Roster: ${dateString}`;
     timelineTracks.innerHTML = '';
 
