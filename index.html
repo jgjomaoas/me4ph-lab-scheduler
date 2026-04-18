@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2.3">
+    <link rel="stylesheet" href="styles.css?v=2.4">
 </head>
 <body class="scientific-slate">
     <div class="app-layout">
@@ -99,9 +99,9 @@
                             <input type="text" id="equipment-name" class="input-field" placeholder="Enter equipment name manually..." style="width:100%">
                         </div>
 
-                        <div style="display:flex; gap:16px;">
+                        <div style="display:flex; flex-direction:column; gap:16px;">
                             <!-- Time In -->
-                            <div class="time-selection-wrapper" style="flex:1;">
+                            <div class="time-selection-wrapper">
                                 <label style="display:block; font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:8px;">Time In</label>
                                 <div style="display:flex; gap:6px;">
                                     <select class="input-field time-select" id="booking-hour-in" style="flex:1; padding:8px;">
@@ -118,7 +118,7 @@
                                 </div>
                             </div>
                             <!-- Time Out -->
-                            <div class="time-selection-wrapper" style="flex:1;">
+                            <div class="time-selection-wrapper">
                                 <label style="display:block; font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:8px;">Time Out</label>
                                 <div style="display:flex; gap:6px;">
                                     <select class="input-field time-select" id="booking-hour-out" style="flex:1; padding:8px;">
