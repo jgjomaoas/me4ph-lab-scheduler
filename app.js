@@ -6,6 +6,7 @@ const state = {
     bookings: JSON.parse(localStorage.getItem('me4ph_bookings')) || {},
     editingIdx: null,
     currentView: 'calendar',
+    pendingDelete: { category: null, idx: null },
     inventory: JSON.parse(localStorage.getItem('me4ph_inventory')) || {
         media: [
             { id: 1, name: 'Nutrient Agar', qty: '500g', ref: 'BD-211665', status: 'Optimal' },
@@ -617,6 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAnalytics();
         initSidebar();
         initInventoryForms();
+        initDeleteModal();
     } catch (err) {
         console.error("Initialization Error:", err);
     }
@@ -738,15 +740,46 @@ function handleInventoryEdit(category, idx) {
 }
 
 function promptInventoryDelete(category, idx) {
-    const pass = prompt("Enter Supervisor Password to DELETE item:");
-    if(pass === "rdflores3") {
-        state.inventory[category].splice(idx, 1);
-        localStorage.setItem('me4ph_inventory', JSON.stringify(state.inventory));
-        updateInventoryUI(category);
-        showToast("Item deleted", "success");
-    } else if(pass !== null) {
-        showToast("Incorrect Password", "danger");
+    state.pendingDelete = { category, idx };
+    const modal = document.getElementById('delete-modal');
+    if(modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex'; // Ensure flex display when shown
     }
+}
+
+function initDeleteModal() {
+    const modal = document.getElementById('delete-modal');
+    const closeBtn = document.getElementById('close-delete-btn');
+    const confirmBtn = document.getElementById('confirm-delete-btn');
+    const passInput = document.getElementById('delete-pass-input');
+
+    if(!modal || !closeBtn || !confirmBtn) return;
+
+    closeBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        passInput.value = '';
+    });
+
+    confirmBtn.addEventListener('click', () => {
+        const pass = passInput.value;
+        const { category, idx } = state.pendingDelete;
+
+        if(pass === "rdflores3") {
+            state.inventory[category].splice(idx, 1);
+            localStorage.setItem('me4ph_inventory', JSON.stringify(state.inventory));
+            updateInventoryUI(category);
+            showToast("Item deleted", "success");
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            passInput.value = '';
+        } else {
+            showToast("Incorrect Password", "danger");
+            passInput.classList.add('error-shake');
+            setTimeout(() => passInput.classList.remove('error-shake'), 500);
+        }
+    });
 }
 
 function initInventoryForms() {
