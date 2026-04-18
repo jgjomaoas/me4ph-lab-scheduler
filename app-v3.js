@@ -37,29 +37,23 @@ const bookingHourOut = document.getElementById('booking-hour-out');
 const bookingAmpmOut = document.getElementById('booking-ampm-out');
 const inStudentName = document.getElementById('student-name');
 const inEquipment = document.getElementById('equipment-name');
-const inNotes = document.getElementById('booking-notes');
+const inNotes = document.getElementById('booking-notes'); // Might be null
 const initiateBtn = document.getElementById('initiate-btn');
-const maintenanceToggle = document.getElementById('maintenance-toggle');
 
-const otWarning = document.getElementById('ot-warning');
 const calendarDays = document.getElementById('calendar-days');
-const conflictWarning = document.getElementById('conflict-warning');
+const conflictWarning = document.getElementById('conflict-warning') || { style: {} };
 
-// Timeline Elements
-const dailyTimeline = document.getElementById('daily-timeline');
-const timelineDateLabel = document.getElementById('timeline-date-label');
 const timelineTracks = document.getElementById('timeline-tracks');
-const exportReportBtn = document.getElementById('export-report-btn');
-
-// Calendar Header Elements
 const currentMonthLabel = document.getElementById('current-month');
 const prevMonthBtn = document.getElementById('prev-month');
 const nextMonthBtn = document.getElementById('next-month');
 
-// Admin Elements
 const adminPassContainer = document.getElementById('admin-pass-container');
 const adminPassInput = document.getElementById('admin-pass-input');
 const adminPassBtn = document.getElementById('admin-pass-btn');
+
+const statResourceGrid = document.getElementById('stat-resource-grid');
+const equipmentChips = document.querySelectorAll('.chip');
 
 // Analytics Elements
 const statResourceGrid = document.getElementById('stat-resource-grid');
@@ -435,9 +429,9 @@ function initiateReservation() {
     localStorage.setItem('me4ph_bookings', JSON.stringify(state.bookings));
     
     // Clear form
-    inStudentName.value = '';
-    inEquipment.value = '';
-    inNotes.value = '';
+    if(inStudentName) inStudentName.value = '';
+    if(inEquipment) inEquipment.value = '';
+    if(inNotes) inNotes.value = '';
     
     refreshUIAndTimeline(state.selectedDate);
     updateAnalytics();
