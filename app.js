@@ -721,12 +721,18 @@ function updateReportsUI() {
     allBookings.forEach(b => {
         const tr = document.createElement('tr');
         
-        // Handle variations in data structure (student vs studentName)
+        // Handle variations in data structure (studentName vs student)
         const name = b.studentName || b.student || 'Unknown User';
         
-        // Handle variations in time (timeIn might already include AM/PM)
-        const tIn = b.timeIn + (b.ampmIn && !b.timeIn.includes('M') ? b.ampmIn : '');
-        const tOut = b.timeOut + (b.ampmOut && !b.timeOut.includes('M') ? b.ampmOut : '');
+        // Handle variations in time (don't add undefined)
+        const formatTime = (time, ampm) => {
+            if (!time) return 'N/A';
+            if (time.toString().includes('M')) return time; // Already has AM/PM
+            return time + (ampm || '');
+        };
+        
+        const tIn = formatTime(b.timeIn, b.ampmIn);
+        const tOut = formatTime(b.timeOut, b.ampmOut);
         
         // Better OT check
         const isOT = b.isOT || (b.timeOut && (b.timeOut.includes('PM') && parseInt(b.timeOut) >= 5));
