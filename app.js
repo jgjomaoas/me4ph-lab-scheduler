@@ -629,12 +629,25 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function migrateInventoryData() {
-    // Ensure all existing items have a supplier field
+    // Force reset Maintenance if it looks like old/simple data
+    const m = state.inventory.maintenance || [];
+    const isOldData = m.length === 0 || !m.some(item => item.ref && item.ref.includes('SN-'));
+    
+    if(isOldData) {
+        state.inventory.maintenance = [
+            { id: 7, name: 'Autoclave Model-X', qty: '2026-03-12', ref: 'SN-EBA-993', supplier: 'Ebara Laboratory', status: 'Operational' },
+            { id: 8, name: 'Incubator Shaker', qty: '2026-04-01', ref: 'SN-NB-4421', supplier: 'New Brunswick', status: 'In Service' },
+            { id: 9, name: 'Ultralow Freezer', qty: '2026-01-15', ref: 'SN-TF-8830', supplier: 'Thermo Fisher Service', status: 'Operational' }
+        ];
+        localStorage.setItem('me4ph_inventory', JSON.stringify(state.inventory));
+    }
+
+    // Standard migration for other fields
     let updated = false;
     for(let cat in state.inventory) {
         state.inventory[cat].forEach(item => {
             if(!item.supplier) {
-                item.supplier = 'N/A';
+                item.supplier = 'Standard Supply';
                 updated = true;
             }
         });
@@ -741,6 +754,24 @@ function updateInventoryUI(category) {
         `;
         tableBody.appendChild(tr);
     });
+
+    // Dynamic Form Labels
+    const inName = document.getElementById('inv-item-name');
+    const inQty = document.getElementById('inv-item-qty');
+    const inRef = document.getElementById('inv-item-ref');
+    const inSupplier = document.getElementById('inv-item-supplier');
+
+    if(category === 'maintenance') {
+        inName.placeholder = "Equipment Name (e.g. Autoclave Model-X)";
+        inQty.placeholder = "Last Service Date (YYYY-MM-DD)";
+        inRef.placeholder = "Serial Number (SN-XXXX)";
+        inSupplier.placeholder = "Service Provider (e.g. Ebara Laboratory)";
+    } else {
+        inName.placeholder = "Item Name (e.g. Nutrient Agar)";
+        inQty.placeholder = "Quantity/Volume (e.g. 500g)";
+        inRef.placeholder = "Batch / Reference #";
+        inSupplier.placeholder = "Supplier Source (e.g. Sigma-Aldrich)";
+    }
 
     // Add Listeners
     document.querySelectorAll('.edit-inv-item').forEach(btn => {
