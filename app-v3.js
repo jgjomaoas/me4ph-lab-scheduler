@@ -28,7 +28,7 @@ const state = {
 
 let isMaintenanceMode = false;
 
-// DOM Elements
+// Global Elements
 const stageClock = document.getElementById('stage-clock');
 const stageDateLabel = document.getElementById('stage-date');
 const bookingHourIn = document.getElementById('booking-hour-in');
@@ -37,29 +37,18 @@ const bookingHourOut = document.getElementById('booking-hour-out');
 const bookingAmpmOut = document.getElementById('booking-ampm-out');
 const inStudentName = document.getElementById('student-name');
 const inEquipment = document.getElementById('equipment-name');
-const inNotes = document.getElementById('booking-notes'); // Might be null
+const inNotes = document.getElementById('booking-notes'); 
 const initiateBtn = document.getElementById('initiate-btn');
 
 const calendarDays = document.getElementById('calendar-days');
-const conflictWarning = document.getElementById('conflict-warning') || { style: {} };
+const conflictWarning = document.getElementById('conflict-warning');
 
 const timelineTracks = document.getElementById('timeline-tracks');
 const currentMonthLabel = document.getElementById('current-month');
 const prevMonthBtn = document.getElementById('prev-month');
 const nextMonthBtn = document.getElementById('next-month');
 
-const adminPassContainer = document.getElementById('admin-pass-container');
-const adminPassInput = document.getElementById('admin-pass-input');
-const adminPassBtn = document.getElementById('admin-pass-btn');
-
 const statResourceGrid = document.getElementById('stat-resource-grid');
-const equipmentChips = document.querySelectorAll('.chip');
-
-// Analytics Elements
-const statResourceGrid = document.getElementById('stat-resource-grid');
-const statTotalHours = document.getElementById('stat-total-hours');
-const statGlobalUtil = document.getElementById('stat-global-util');
-
 const equipmentChips = document.querySelectorAll('.chip');
 
 function updateClock() {
@@ -497,49 +486,20 @@ timeInputs.forEach(input => {
     if(input) input.addEventListener('change', handleOTCheck);
 });
 
+// Event Listeners
 if (initiateBtn) initiateBtn.addEventListener('click', initiateReservation);
 
-if (maintenanceToggle) {
-    maintenanceToggle.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            // Prompt for password
-            e.target.checked = false; // Reset visually until unlocked
-            adminPassContainer.classList.remove('hidden');
-        } else {
-            // Turn off maintenance mode
-            isMaintenanceMode = false;
-            adminPassContainer.classList.add('hidden');
-            showToast('Maintenance mode disabled. Grid restored.', 'success');
-            renderCalendar();
-        }
+if (prevMonthBtn) {
+    prevMonthBtn.addEventListener('click', () => {
+        state.viewDate.setMonth(state.viewDate.getMonth() - 1);
+        renderCalendar();
     });
 }
 
-if (adminPassBtn) {
-    adminPassBtn.addEventListener('click', () => {
-        if (adminPassInput.value === 'rdflores3') {
-            isMaintenanceMode = true;
-            maintenanceToggle.checked = true;
-            adminPassContainer.classList.add('hidden');
-            adminPassInput.value = '';
-            showToast('Admin override: Laboratory locked for maintenance.', 'warning');
-            dailyTimeline.classList.add('hidden');
-            renderCalendar();
-        } else {
-            adminPassInput.classList.add('shake');
-            setTimeout(() => adminPassInput.classList.remove('shake'), 400);
-            showToast('Invalid Admin Password.', 'error');
-            adminPassInput.value = '';
-        }
-    });
-}
-
-if (exportReportBtn) {
-    exportReportBtn.addEventListener('click', () => {
-        showToast('Generating PDF Log...', 'success');
-        setTimeout(() => {
-            showToast('ME4PH_Daily_Log.pdf exported successfully.', 'success');
-        }, 1500);
+if (nextMonthBtn) {
+    nextMonthBtn.addEventListener('click', () => {
+        state.viewDate.setMonth(state.viewDate.getMonth() + 1);
+        renderCalendar();
     });
 }
 
@@ -737,7 +697,7 @@ function updateReportsUI() {
             <td style="color:var(--text-dim);">${b.equipment}</td>
             <td class="mono" style="color:var(--text-dim);">${tIn} - ${tOut}</td>
             <td style="text-align:right;">
-                <span class="chip" style="background:var(--glass-highlight); color:var(--accent-core); padding:6px 12px; border-radius:8px; font-size:10px; font-weight:800; border:1px solid var(--accent-glow);">VERIFIED</span>
+                <span style="background:var(--glass-highlight); color:var(--accent-core); padding:6px 12px; border-radius:8px; font-size:10px; font-weight:800; border:1px solid var(--accent-glow);">VERIFIED</span>
             </td>
         `;
         tableBody.appendChild(tr);
