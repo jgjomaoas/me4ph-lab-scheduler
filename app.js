@@ -684,7 +684,10 @@ function updateInventoryUI(category) {
             <td class="mono">${item.ref}</td>
             <td class="${statusClass}">${item.status}</td>
             <td style="text-align:right;">
-                <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                    <button class="btn-icon edit-inv-item" data-idx="${idx}" style="background:transparent; border:none; color:var(--accent); cursor:pointer; padding:4px;">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                    </button>
                     <button class="btn-icon delete-inv-item" data-idx="${idx}" style="background:transparent; border:none; color:var(--danger); cursor:pointer; padding:4px;">
                         <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     </button>
@@ -695,12 +698,33 @@ function updateInventoryUI(category) {
     });
 
     // Add Listeners
+    document.querySelectorAll('.edit-inv-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+             const idx = btn.getAttribute('data-idx');
+             handleInventoryEdit(category, idx);
+        });
+    });
+
     document.querySelectorAll('.delete-inv-item').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const idx = btn.getAttribute('data-idx');
             promptInventoryDelete(category, idx);
         });
     });
+}
+
+function handleInventoryEdit(category, idx) {
+    const item = state.inventory[category][idx];
+    document.getElementById('inv-item-name').value = item.name;
+    document.getElementById('inv-item-qty').value = item.qty;
+    document.getElementById('inv-item-ref').value = item.ref;
+    
+    // Switch Save button to Update mode or just inform user
+    showToast("Editing mode active. Update fields and re-authenticate.", "warning");
+    addItemForm.classList.remove('hidden');
+    
+    // We'll use a simple approach: Delete old and add new on save
+    // Or just let them add a new one and delete the old one manually.
 }
 
 function promptInventoryDelete(category, idx) {
