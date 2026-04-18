@@ -9,16 +9,16 @@ const state = {
     pendingDelete: { category: null, idx: null },
     inventory: JSON.parse(localStorage.getItem('me4ph_inventory')) || {
         media: [
-            { id: 1, name: 'Nutrient Agar', qty: '500g', ref: 'BD-211665', status: 'Optimal' },
-            { id: 2, name: 'Potato Dextrose Agar', qty: '200g', ref: 'OX-CM0139', status: 'Low Stock' }
+            { id: 1, name: 'Nutrient Agar', qty: '500g', ref: 'BD-211665', supplier: 'Becton Dickinson', status: 'Optimal' },
+            { id: 2, name: 'Potato Dextrose Agar', qty: '200g', ref: 'OX-CM0139', supplier: 'Oxoid Ltd', status: 'Low Stock' }
         ],
         supplies: [
-            { id: 3, name: 'Petri Dishes (Glass)', qty: '48 pcs', ref: 'PYREX-100', status: 'Optimal' },
-            { id: 4, name: 'Pipette Tips (200uL)', qty: '2 boxes', ref: 'EPP-773', status: 'Reorder' }
+            { id: 3, name: 'Petri Dishes (Glass)', qty: '48 pcs', ref: 'PYREX-100', supplier: 'Corning/Pyrex', status: 'Optimal' },
+            { id: 4, name: 'Pipette Tips (200uL)', qty: '2 boxes', ref: 'EPP-773', supplier: 'Eppendorf', status: 'Reorder' }
         ],
         maintenance: [
-            { id: 5, name: 'Autoclave Model-X', qty: 'Service Done', ref: '2026-03-12', status: 'Operational' },
-            { id: 6, name: 'Incubator Shaker', qty: 'Calibration', ref: '2026-04-01', status: 'Pending' }
+            { id: 5, name: 'Autoclave Model-X', qty: 'Service Done', ref: '2026-03-12', supplier: 'Ebara', status: 'Operational' },
+            { id: 6, name: 'Incubator Shaker', qty: 'Calibration', ref: '2026-04-01', supplier: 'Thermo Sci', status: 'Pending' }
         ]
     }
 };
@@ -681,6 +681,7 @@ function updateInventoryUI(category) {
     tableHead.innerHTML = `
         <th>Item Description</th>
         <th>Quantity</th>
+        <th>Supplier</th>
         <th>Reference</th>
         <th>Status</th>
         <th style="width:100px; text-align:right;">Actions</th>
@@ -695,6 +696,7 @@ function updateInventoryUI(category) {
         tr.innerHTML = `
             <td>${item.name}</td>
             <td>${item.qty}</td>
+            <td>${item.supplier || 'N/A'}</td>
             <td class="mono">${item.ref}</td>
             <td class="${statusClass}">${item.status}</td>
             <td style="text-align:right;">
@@ -733,6 +735,7 @@ function handleInventoryEdit(category, idx) {
     document.getElementById('inv-item-name').value = item.name;
     document.getElementById('inv-item-qty').value = item.qty;
     document.getElementById('inv-item-ref').value = item.ref;
+    document.getElementById('inv-item-supplier').value = item.supplier || '';
     
     showToast("Editing mode active. Update fields and re-authenticate.", "warning");
     const addItemForm = document.getElementById('add-item-form');
@@ -796,6 +799,7 @@ function initInventoryForms() {
             const name = document.getElementById('inv-item-name').value;
             const qty = document.getElementById('inv-item-qty').value;
             const ref = document.getElementById('inv-item-ref').value;
+            const supplier = document.getElementById('inv-item-supplier').value;
             const pass = document.getElementById('inv-item-pass').value;
 
             if(!name || !qty || !ref) {
@@ -810,7 +814,7 @@ function initInventoryForms() {
 
             state.inventory[state.currentView].push({
                 id: Date.now(),
-                name, qty, ref, status: 'Optimal'
+                name, qty, ref, supplier, status: 'Optimal'
             });
 
             localStorage.setItem('me4ph_inventory', JSON.stringify(state.inventory));
@@ -820,6 +824,7 @@ function initInventoryForms() {
             document.getElementById('inv-item-name').value = '';
             document.getElementById('inv-item-qty').value = '';
             document.getElementById('inv-item-ref').value = '';
+            document.getElementById('inv-item-supplier').value = '';
             document.getElementById('inv-item-pass').value = '';
 
             showToast("Inventory item added successfully", "success");
