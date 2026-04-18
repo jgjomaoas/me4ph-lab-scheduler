@@ -720,12 +720,22 @@ function updateReportsUI() {
 
     allBookings.forEach(b => {
         const tr = document.createElement('tr');
-        const isOT = parseInt(b.timeOut) > 17 || b.ampmOut === 'PM'; // Simple OT check
+        
+        // Handle variations in data structure (student vs studentName)
+        const name = b.studentName || b.student || 'Unknown User';
+        
+        // Handle variations in time (timeIn might already include AM/PM)
+        const tIn = b.timeIn + (b.ampmIn && !b.timeIn.includes('M') ? b.ampmIn : '');
+        const tOut = b.timeOut + (b.ampmOut && !b.timeOut.includes('M') ? b.ampmOut : '');
+        
+        // Better OT check
+        const isOT = b.isOT || (b.timeOut && (b.timeOut.includes('PM') && parseInt(b.timeOut) >= 5));
+
         tr.innerHTML = `
             <td style="padding-left:24px; font-weight:700; color:var(--accent);">${b.date}</td>
-            <td style="font-weight:600;">${b.studentName || 'Unknown User'}</td>
+            <td style="font-weight:600;">${name}</td>
             <td>${b.equipment}</td>
-            <td class="mono">${b.timeIn} - ${b.timeOut}</td>
+            <td class="mono">${tIn} - ${tOut}</td>
             <td><span class="chip" style="background:${isOT ? 'var(--accent-muted)' : 'transparent'}; border-color:${isOT ? 'var(--accent)' : 'var(--border)'}">${isOT ? 'OT PERMIT' : 'REGULAR'}</span></td>
             <td style="padding-right:24px; color:var(--success); font-weight:700;">VERIFIED</td>
         `;
