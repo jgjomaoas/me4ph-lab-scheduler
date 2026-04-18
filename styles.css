@@ -52,15 +52,27 @@ body {
 .mono { font-family: var(--font-mono); font-size: 0.9em; letter-spacing: -0.5px; }
 
 /* Scrollbar Customization */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-highlight); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+::-webkit-scrollbar-thumb { 
+    background: var(--accent); 
+    border-radius: 4px; 
+    border: 2px solid var(--bg-surface);
+}
+::-webkit-scrollbar-thumb:hover { background: #fff; }
 
 /* Layout Grid */
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
 .app-layout {
     display: flex;
     height: 100vh;
+    width: 100vw;
+    background: var(--bg-main);
     overflow: hidden;
 }
 
@@ -156,6 +168,7 @@ body {
     grid-template-rows: 1fr 1fr;
     flex: 1;
     gap: 0;
+    min-height: 0; /* Critical for internal flex scrolling */
 }
 
 .bento-card {
@@ -166,9 +179,10 @@ body {
     box-shadow: none;
     transition: var(--transition);
     position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
+    overflow-y: auto; /* Enable internal scrolling */
+    max-height: 50vh; /* Constraint for 2x2 grid */
 }
 
 .bento-card:hover { border-color: var(--border-highlight); }
