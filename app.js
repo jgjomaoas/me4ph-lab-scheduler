@@ -2,9 +2,24 @@
 
 const state = {
     selectedDate: null,
-    viewDate: new Date(2026, 3, 1), // Default to April 2026 for now
+    viewDate: new Date(2026, 3, 1), 
     bookings: JSON.parse(localStorage.getItem('me4ph_bookings')) || {},
-    editingIdx: null
+    editingIdx: null,
+    currentView: 'calendar',
+    inventory: JSON.parse(localStorage.getItem('me4ph_inventory')) || {
+        media: [
+            { id: 1, name: 'Nutrient Agar', qty: '500g', ref: 'BD-211665', status: 'Optimal' },
+            { id: 2, name: 'Potato Dextrose Agar', qty: '200g', ref: 'OX-CM0139', status: 'Low Stock' }
+        ],
+        supplies: [
+            { id: 3, name: 'Petri Dishes (Glass)', qty: '48 pcs', ref: 'PYREX-100', status: 'Optimal' },
+            { id: 4, name: 'Pipette Tips (200uL)', qty: '2 boxes', ref: 'EPP-773', status: 'Reorder' }
+        ],
+        maintenance: [
+            { id: 5, name: 'Autoclave Model-X', qty: 'Service Done', ref: '2026-03-12', status: 'Operational' },
+            { id: 6, name: 'Incubator Shaker', qty: 'Calibration', ref: '2026-04-01', status: 'Pending' }
+        ]
+    }
 };
 
 let isMaintenanceMode = false;
@@ -598,3 +613,134 @@ updateClock();
 handleOTCheck();
 renderCalendar();
 updateAnalytics();
+initSidebar();
+
+// --- Sidebar Navigation ---
+function initSidebar() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const dashboardStage = document.getElementById('dashboard-stage');
+    const inventoryStage = document.getElementById('inventory-stage');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const view = link.getAttribute('data-view');
+            if(!view) return;
+
+            // Update Active State
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+
+            state.currentView = view;
+
+            if(view === 'calendar') {
+                dashboardStage.classList.remove('hidden');
+                inventoryStage.classList.add('hidden');
+            } else if(['media', 'supplies', 'maintenance'].includes(view)) {
+                dashboardStage.classList.add('hidden');
+                inventoryStage.classList.remove('hidden');
+                updateInventoryUI(view);
+            } else {
+                showToast("Section implementation pending...", "warning");
+            }
+        });
+    });
+}
+
+function updateInventoryUI(category) {
+    const title = document.getElementById('inventory-title');
+    const subtitle = document.getElementById('inventory-subtitle');
+    const tableBody = document.getElementById('inventory-table-body');
+    
+    const meta = {
+        media: { t: "Microbial Media Inventory", s: "Culture media and growth components" },
+        supplies: { t: "Supplies & Glassware", s: "Laboratory consumables and materials" },
+        maintenance: { t: "Repair & Maintenance Log", s: "Equipment service history and status" }
+    };
+
+    if(!meta[category]) return;
+
+    title.innerText = meta[category].t;
+    subtitle.innerText = meta[category].s;
+    tableBody.innerHTML = '';
+
+    state.inventory[category].forEach(item => {
+        const tr = document.createElement('tr');
+        const statusClass = item.status === 'Low Stock' || item.status === 'Reorder' || item.status === 'Pending' ? 'low-stock' : '';
+        tr.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.qty}</td>
+            <td class="mono">${item.ref}</td>
+            <td class="${statusClass}">${item.status}</td>
+        `;
+        tableBody.appendChild(tr);
+    });
+}
+
+// --- Inventory Forms ---
+const openAddItemBtn = document.getElementById('open-add-item-btn');
+const addItemForm = document.getElementById('add-item-form');
+const cancelInvBtn = document.getElementById('cancel-inv-btn');
+const saveInvBtn = document.getElementById('save-inv-btn');
+
+if(openAddItemBtn) {
+    openAddItemBtn.addEventListener('click', () => addItemForm.classList.toggle('hidden'));
+}
+if(cancelInvBtn) {
+    cancelInvBtn.addEventListener('click', () => addItemForm.classList.add('hidden'));
+}
+
+if(saveInvBtn) {
+    saveInvBtn.addEventListener('click', () => {
+        const name = document.getElementById('inv-item-name').value;
+        const qty = document.getElementById('inv-item-qty').value;
+        const ref = document.getElementById('inv-item-ref').value;
+        const pass = document.getElementById('inv-item-pass').value;
+
+        if(!name || !qty || !ref) {
+            showToast("Please fill all fields", "warning");
+            return;
+        }
+
+        if(pass !== "rdflores3") {
+            showToast("Incorrect Supervisor Password", "danger");
+            return;
+        }
+
+        // Success Authentication
+        state.inventory[state.currentView].push({
+            id: Date.now(),
+            name,
+            qty,
+            ref,
+            status: 'Optimal'
+        });
+
+        localStorage.setItem('me4ph_inventory', JSON.stringify(state.inventory));
+        updateInventoryUI(state.currentView);
+        addItemForm.classList.add('hidden');
+        
+        // Clear fields
+        document.getElementById('inv-item-name').value = '';
+        document.getElementById('inv-item-qty').value = '';
+        document.getElementById('inv-item-ref').value = '';
+        document.getElementById('inv-item-pass').value = '';
+
+        showToast("Inventory item added successfully", "success");
+    });
+}
+
+function showToast(msg, type = "success") {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'bento-card toast';
+    toast.style.padding = '12px 24px';
+    toast.style.marginBottom = '12px';
+    toast.style.background = type === 'danger' ? 'var(--danger)' : (type === 'warning' ? 'var(--warning)' : 'var(--success)');
+    toast.style.color = '#fff';
+    toast.style.fontWeight = '700';
+    toast.style.borderRadius = '8px';
+    toast.innerText = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
