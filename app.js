@@ -607,19 +607,28 @@ equipmentChips.forEach(chip => {
     });
 });
 
-// Initialization
-setInterval(updateClock, 1000);
-updateClock();
-handleOTCheck();
-renderCalendar();
-updateAnalytics();
-initSidebar();
+// --- Initialization Wrapper ---
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        updateClock();
+        setInterval(updateClock, 1000);
+        handleOTCheck();
+        renderCalendar();
+        updateAnalytics();
+        initSidebar();
+        initInventoryForms();
+    } catch (err) {
+        console.error("Initialization Error:", err);
+    }
+});
 
 // --- Sidebar Navigation ---
 function initSidebar() {
     const navLinks = document.querySelectorAll('.nav-link');
     const dashboardStage = document.getElementById('dashboard-stage');
     const inventoryStage = document.getElementById('inventory-stage');
+
+    if(!navLinks.length || !dashboardStage || !inventoryStage) return;
 
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -653,6 +662,8 @@ function updateInventoryUI(category) {
     const tableBody = document.getElementById('inventory-table-body');
     const tableHead = document.getElementById('inventory-table-head');
     
+    if(!title || !tableBody || !tableHead) return;
+
     const meta = {
         media: { t: "Microbial Media Inventory", s: "Culture media and growth components" },
         supplies: { t: "Supplies & Glassware", s: "Laboratory consumables and materials" },
@@ -675,7 +686,8 @@ function updateInventoryUI(category) {
 
     tableBody.innerHTML = '';
 
-    state.inventory[category].forEach((item, idx) => {
+    const items = state.inventory[category] || [];
+    items.forEach((item, idx) => {
         const tr = document.createElement('tr');
         const statusClass = item.status === 'Low Stock' || item.status === 'Reorder' || item.status === 'Pending' ? 'low-stock' : '';
         tr.innerHTML = `
@@ -706,7 +718,7 @@ function updateInventoryUI(category) {
     });
 
     document.querySelectorAll('.delete-inv-item').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
             const idx = btn.getAttribute('data-idx');
             promptInventoryDelete(category, idx);
         });
@@ -715,16 +727,14 @@ function updateInventoryUI(category) {
 
 function handleInventoryEdit(category, idx) {
     const item = state.inventory[category][idx];
+    if(!item) return;
     document.getElementById('inv-item-name').value = item.name;
     document.getElementById('inv-item-qty').value = item.qty;
     document.getElementById('inv-item-ref').value = item.ref;
     
-    // Switch Save button to Update mode or just inform user
     showToast("Editing mode active. Update fields and re-authenticate.", "warning");
-    addItemForm.classList.remove('hidden');
-    
-    // We'll use a simple approach: Delete old and add new on save
-    // Or just let them add a new one and delete the old one manually.
+    const addItemForm = document.getElementById('add-item-form');
+    if(addItemForm) addItemForm.classList.remove('hidden');
 }
 
 function promptInventoryDelete(category, idx) {
@@ -739,61 +749,54 @@ function promptInventoryDelete(category, idx) {
     }
 }
 
-// --- Inventory Forms ---
-const openAddItemBtn = document.getElementById('open-add-item-btn');
-const addItemForm = document.getElementById('add-item-form');
-const cancelInvBtn = document.getElementById('cancel-inv-btn');
-const saveInvBtn = document.getElementById('save-inv-btn');
+function initInventoryForms() {
+    const openAddItemBtn = document.getElementById('open-add-item-btn');
+    const addItemForm = document.getElementById('add-item-form');
+    const cancelInvBtn = document.getElementById('cancel-inv-btn');
+    const saveInvBtn = document.getElementById('save-inv-btn');
 
-if(openAddItemBtn) {
-    openAddItemBtn.addEventListener('click', () => addItemForm.classList.toggle('hidden'));
-}
-if(cancelInvBtn) {
-    cancelInvBtn.addEventListener('click', () => addItemForm.classList.add('hidden'));
-}
+    if(openAddItemBtn) openAddItemBtn.addEventListener('click', () => addItemForm.classList.toggle('hidden'));
+    if(cancelInvBtn) cancelInvBtn.addEventListener('click', () => addItemForm.classList.add('hidden'));
 
-if(saveInvBtn) {
-    saveInvBtn.addEventListener('click', () => {
-        const name = document.getElementById('inv-item-name').value;
-        const qty = document.getElementById('inv-item-qty').value;
-        const ref = document.getElementById('inv-item-ref').value;
-        const pass = document.getElementById('inv-item-pass').value;
+    if(saveInvBtn) {
+        saveInvBtn.addEventListener('click', () => {
+            const name = document.getElementById('inv-item-name').value;
+            const qty = document.getElementById('inv-item-qty').value;
+            const ref = document.getElementById('inv-item-ref').value;
+            const pass = document.getElementById('inv-item-pass').value;
 
-        if(!name || !qty || !ref) {
-            showToast("Please fill all fields", "warning");
-            return;
-        }
+            if(!name || !qty || !ref) {
+                showToast("Please fill all fields", "warning");
+                return;
+            }
 
-        if(pass !== "rdflores3") {
-            showToast("Incorrect Supervisor Password", "danger");
-            return;
-        }
+            if(pass !== "rdflores3") {
+                showToast("Incorrect Supervisor Password", "danger");
+                return;
+            }
 
-        // Success Authentication
-        state.inventory[state.currentView].push({
-            id: Date.now(),
-            name,
-            qty,
-            ref,
-            status: 'Optimal'
+            state.inventory[state.currentView].push({
+                id: Date.now(),
+                name, qty, ref, status: 'Optimal'
+            });
+
+            localStorage.setItem('me4ph_inventory', JSON.stringify(state.inventory));
+            updateInventoryUI(state.currentView);
+            addItemForm.classList.add('hidden');
+            
+            document.getElementById('inv-item-name').value = '';
+            document.getElementById('inv-item-qty').value = '';
+            document.getElementById('inv-item-ref').value = '';
+            document.getElementById('inv-item-pass').value = '';
+
+            showToast("Inventory item added successfully", "success");
         });
-
-        localStorage.setItem('me4ph_inventory', JSON.stringify(state.inventory));
-        updateInventoryUI(state.currentView);
-        addItemForm.classList.add('hidden');
-        
-        // Clear fields
-        document.getElementById('inv-item-name').value = '';
-        document.getElementById('inv-item-qty').value = '';
-        document.getElementById('inv-item-ref').value = '';
-        document.getElementById('inv-item-pass').value = '';
-
-        showToast("Inventory item added successfully", "success");
-    });
+    }
 }
 
 function showToast(msg, type = "success") {
     const container = document.getElementById('toast-container');
+    if(!container) return;
     const toast = document.createElement('div');
     toast.className = 'bento-card toast';
     toast.style.padding = '12px 24px';
