@@ -10,15 +10,18 @@ const state = {
     inventory: JSON.parse(localStorage.getItem('me4ph_inventory')) || {
         media: [
             { id: 1, name: 'Nutrient Agar', qty: '500g', ref: 'BD-211665', supplier: 'Becton Dickinson', status: 'Optimal' },
-            { id: 2, name: 'Potato Dextrose Agar', qty: '200g', ref: 'OX-CM0139', supplier: 'Oxoid Ltd', status: 'Low Stock' }
+            { id: 2, name: 'Potato Dextrose Agar', qty: '200g', ref: 'OX-CM0139', supplier: 'Oxoid Ltd', status: 'Low Stock' },
+            { id: 3, name: 'Tryptic Soy Broth', qty: '1000ml', ref: 'SGM-A440', supplier: 'Sigma-Aldrich', status: 'Optimal' }
         ],
         supplies: [
-            { id: 3, name: 'Petri Dishes (Glass)', qty: '48 pcs', ref: 'PYREX-100', supplier: 'Corning/Pyrex', status: 'Optimal' },
-            { id: 4, name: 'Pipette Tips (200uL)', qty: '2 boxes', ref: 'EPP-773', supplier: 'Eppendorf', status: 'Reorder' }
+            { id: 4, name: 'Petri Dishes (Glass)', qty: '48 pcs', ref: 'PYREX-100', supplier: 'Corning/Pyrex', status: 'Optimal' },
+            { id: 5, name: 'Pipette Tips (200uL)', qty: '2 boxes', ref: 'EPP-773', supplier: 'Eppendorf Canada', status: 'Reorder' },
+            { id: 6, name: 'Nitrile Gloves (M)', qty: '10 packs', ref: 'TF-GL22', supplier: 'Thermo Fisher Scientific', status: 'Optimal' }
         ],
         maintenance: [
-            { id: 5, name: 'Autoclave Model-X', qty: 'Service Done', ref: '2026-03-12', supplier: 'Ebara', status: 'Operational' },
-            { id: 6, name: 'Incubator Shaker', qty: 'Calibration', ref: '2026-04-01', supplier: 'Thermo Sci', status: 'Pending' }
+            { id: 7, name: 'Autoclave Model-X', qty: '2026-03-12', ref: 'SN-EBA-993', supplier: 'Ebara Laboratory', status: 'Operational' },
+            { id: 8, name: 'Incubator Shaker', qty: '2026-04-01', ref: 'SN-NB-4421', supplier: 'New Brunswick', status: 'In Service' },
+            { id: 9, name: 'Ultralow Freezer', qty: '2026-01-15', ref: 'SN-TF-8830', supplier: 'Thermo Fisher Service', status: 'Operational' }
         ]
     }
 };
@@ -692,15 +695,26 @@ function updateInventoryUI(category) {
     title.innerText = meta[category].t;
     subtitle.innerText = meta[category].s;
     
-    // Update Head
-    tableHead.innerHTML = `
-        <th>Item Description</th>
-        <th>Quantity</th>
-        <th>Supplier</th>
-        <th>Reference</th>
-        <th>Status</th>
-        <th style="width:100px; text-align:right;">Actions</th>
-    `;
+    // Update Head with category-specific labels
+    if(category === 'maintenance') {
+        tableHead.innerHTML = `
+            <th>Equipment Name</th>
+            <th>Last Service</th>
+            <th>Service Provider</th>
+            <th>Serial Number</th>
+            <th>Operational Status</th>
+            <th style="width:100px; text-align:right;">Actions</th>
+        `;
+    } else {
+        tableHead.innerHTML = `
+            <th>Item Description</th>
+            <th>Quantity/Volume</th>
+            <th>Supplier Source</th>
+            <th>Batch/Ref #</th>
+            <th>Stock Status</th>
+            <th style="width:100px; text-align:right;">Actions</th>
+        `;
+    }
 
     tableBody.innerHTML = '';
 
