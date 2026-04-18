@@ -747,8 +747,27 @@ function updateReportsUI() {
         tableBody.appendChild(tr);
     });
 
-    // Handle Print
-    document.getElementById('print-report-btn').onclick = () => window.print();
+    // Handle Copy to Notepad
+    document.getElementById('copy-report-btn').onclick = () => {
+        let text = "ME4PH LAB USAGE REPORT\n";
+        text += "Generated: " + new Date().toLocaleString() + "\n";
+        text += "--------------------------------------------------\n";
+        text += "DATE\tNAME\tEQUIPMENT\tSCHEDULE\tSTATUS\n";
+        text += "--------------------------------------------------\n";
+        
+        allBookings.forEach(b => {
+             const name = b.studentName || b.student || 'Unknown User';
+             const tIn = formatTime(b.timeIn, b.ampmIn);
+             const tOut = formatTime(b.timeOut, b.ampmOut);
+             text += `${b.date}\t${name}\t${b.equipment}\t${tIn}-${tOut}\tVERIFIED\n`;
+        });
+        
+        navigator.clipboard.writeText(text).then(() => {
+            showToast("Report copied to clipboard!", "success");
+        }).catch(err => {
+            showToast("Failed to copy. Try manual selection.", "danger");
+        });
+    };
 }
 
 function updateInventoryUI(category) {
