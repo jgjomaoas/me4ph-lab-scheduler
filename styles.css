@@ -1,43 +1,38 @@
 :root {
-    /* Color Palette: Scientific Slate */
-    --bg-main: #0a0c10;
-    --bg-surface: #12161d;
-    --bg-surface-elevated: #1a1f29;
-    --bg-glass: rgba(18, 22, 29, 0.7);
+    /* Color Palette: Fresh Lab Navy */
+    --bg-main: #0B0F1A;
+    --bg-surface: #141C2F;
+    --bg-surface-elevated: #1D283C;
+    --bg-glass: rgba(11, 15, 26, 0.85);
     
-    --accent: #00f2ff; /* Neon Cyan */
-    --accent-muted: rgba(0, 242, 255, 0.15);
-    --accent-glow: rgba(0, 242, 255, 0.3);
+    --accent: #00D1FF; /* Pacific Azure */
+    --accent-muted: rgba(0, 209, 255, 0.1);
+    --accent-glow: rgba(0, 209, 255, 0.25);
     
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
     
-    --border: rgba(255, 255, 255, 0.05);
-    --border-highlight: rgba(0, 242, 255, 0.5);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-highlight: rgba(0, 209, 255, 0.4);
     
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --amber-bg: rgba(245, 158, 11, 0.08);
-    --amber-border: rgba(245, 158, 11, 0.3);
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
     
-    /* Typography */
-    --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    /* Typography: Modern & Crisp */
+    --font-sans: 'Inter', 'Plus Jakarta Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
     
     /* Layout */
     --radius: 12px;
-    --sidebar-width: 260px;
-    --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    
-    /* Shadows */
-    --shadow-inner: inset 0 1px 1px rgba(255, 255, 255, 0.05);
-    --shadow-glow: 0 0 20px rgba(0, 242, 255, 0.1);
+    --sidebar-width: 280px;
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
     margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
 }
 
 body {
@@ -163,8 +158,9 @@ html, body {
 /* Bento Grid */
 .bento-grid {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-auto-rows: auto;
+    grid-template-columns: 2fr 10fr;
+    grid-template-rows: auto auto;
+    flex: 1;
     gap: 0;
 }
 
@@ -195,10 +191,10 @@ html, body {
 }
 
 /* Scheduling Engine Module */
-.scheduling-module { grid-column: span 12; border-bottom: 2px solid var(--accent-glow); }
-.calendar-module { grid-column: span 8; border-right: 1px solid var(--border); }
-.analytics-module { grid-column: span 4; }
-.timeline-module { grid-column: span 12; border-top: 1px solid var(--border); }
+.scheduling-module { border-bottom: 2px solid var(--accent-glow); }
+.calendar-module { border-right: 1px solid var(--border); }
+.analytics-module { }
+.timeline-module { border-top: 1px solid var(--border); }
 
 .booking-controls {
     display: flex;
