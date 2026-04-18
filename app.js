@@ -651,6 +651,7 @@ function updateInventoryUI(category) {
     const title = document.getElementById('inventory-title');
     const subtitle = document.getElementById('inventory-subtitle');
     const tableBody = document.getElementById('inventory-table-body');
+    const tableHead = document.getElementById('inventory-table-head');
     
     const meta = {
         media: { t: "Microbial Media Inventory", s: "Culture media and growth components" },
@@ -662,9 +663,19 @@ function updateInventoryUI(category) {
 
     title.innerText = meta[category].t;
     subtitle.innerText = meta[category].s;
+    
+    // Update Head
+    tableHead.innerHTML = `
+        <th>Item Description</th>
+        <th>Quantity</th>
+        <th>Reference</th>
+        <th>Status</th>
+        <th style="width:100px; text-align:right;">Actions</th>
+    `;
+
     tableBody.innerHTML = '';
 
-    state.inventory[category].forEach(item => {
+    state.inventory[category].forEach((item, idx) => {
         const tr = document.createElement('tr');
         const statusClass = item.status === 'Low Stock' || item.status === 'Reorder' || item.status === 'Pending' ? 'low-stock' : '';
         tr.innerHTML = `
@@ -672,9 +683,36 @@ function updateInventoryUI(category) {
             <td>${item.qty}</td>
             <td class="mono">${item.ref}</td>
             <td class="${statusClass}">${item.status}</td>
+            <td style="text-align:right;">
+                <div style="display:flex; gap:8px; justify-content:flex-end;">
+                    <button class="btn-icon delete-inv-item" data-idx="${idx}" style="background:transparent; border:none; color:var(--danger); cursor:pointer; padding:4px;">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                </div>
+            </td>
         `;
         tableBody.appendChild(tr);
     });
+
+    // Add Listeners
+    document.querySelectorAll('.delete-inv-item').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const idx = btn.getAttribute('data-idx');
+            promptInventoryDelete(category, idx);
+        });
+    });
+}
+
+function promptInventoryDelete(category, idx) {
+    const pass = prompt("Enter Supervisor Password to DELETE item:");
+    if(pass === "rdflores3") {
+        state.inventory[category].splice(idx, 1);
+        localStorage.setItem('me4ph_inventory', JSON.stringify(state.inventory));
+        updateInventoryUI(category);
+        showToast("Item deleted", "success");
+    } else if(pass !== null) {
+        showToast("Incorrect Password", "danger");
+    }
 }
 
 // --- Inventory Forms ---
