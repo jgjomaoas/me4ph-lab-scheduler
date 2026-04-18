@@ -196,7 +196,7 @@ html, body {
 }
 
 /* Scheduling Engine Module */
-.scheduling-module { grid-column: span 5; grid-row: span 2; }
+.scheduling-module { }
 
 .booking-controls {
     display: flex;
@@ -242,7 +242,7 @@ html, body {
 .warning-icon { font-size: 18px; line-height: 1; }
 
 /* Admin Locked Inventory Module */
-.inventory-module { grid-column: span 7; grid-row: span 3; position: relative; }
+.inventory-module { position: relative; }
 
 .tabs-header {
     display: flex;
