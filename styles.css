@@ -68,7 +68,15 @@ body {
     animation: slideRight var(--ease-gravity) 0.8s;
 }
 
+.nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .nav-link {
+    display: block;
+    width: 100%;
     padding: 14px 20px;
     border-radius: 12px;
     color: var(--text-dim);
