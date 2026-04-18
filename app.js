@@ -660,8 +660,9 @@ function initSidebar() {
     const navLinks = document.querySelectorAll('.nav-link');
     const dashboardStage = document.getElementById('dashboard-stage');
     const inventoryStage = document.getElementById('inventory-stage');
+    const reportsStage = document.getElementById('reports-stage');
 
-    if(!navLinks.length || !dashboardStage || !inventoryStage) return;
+    if(!navLinks.length || !dashboardStage || !inventoryStage || !reportsStage) return;
 
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -675,18 +676,64 @@ function initSidebar() {
 
             state.currentView = view;
 
+            // Stage Toggling
+            dashboardStage.classList.add('hidden');
+            inventoryStage.classList.add('hidden');
+            reportsStage.classList.add('hidden');
+
             if(view === 'calendar') {
                 dashboardStage.classList.remove('hidden');
-                inventoryStage.classList.add('hidden');
             } else if(['media', 'supplies', 'maintenance'].includes(view)) {
-                dashboardStage.classList.add('hidden');
                 inventoryStage.classList.remove('hidden');
                 updateInventoryUI(view);
+            } else if(view === 'reports') {
+                reportsStage.classList.remove('hidden');
+                updateReportsUI();
             } else {
                 showToast("Section implementation pending...", "warning");
             }
         });
     });
+}
+
+function updateReportsUI() {
+    const tableBody = document.getElementById('reports-table-body');
+    if(!tableBody) return;
+
+    tableBody.innerHTML = '';
+
+    // Flatten all bookings into a single array for reporting
+    const allBookings = [];
+    for(let dateStr in state.bookings) {
+        state.bookings[dateStr].forEach(b => {
+            allBookings.push({ date: dateStr, ...b });
+        });
+    }
+
+    // Sort by date (descending)
+    allBookings.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if(allBookings.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:48px; color:var(--text-muted);">No lab usage records found.</td></tr>`;
+        return;
+    }
+
+    allBookings.forEach(b => {
+        const tr = document.createElement('tr');
+        const isOT = parseInt(b.timeOut) > 17 || b.ampmOut === 'PM'; // Simple OT check
+        tr.innerHTML = `
+            <td style="padding-left:24px; font-weight:700; color:var(--accent);">${b.date}</td>
+            <td style="font-weight:600;">${b.student}</td>
+            <td>${b.equipment}</td>
+            <td class="mono">${b.timeIn}${b.ampmIn} - ${b.timeOut}${b.ampmOut}</td>
+            <td><span class="chip" style="background:${isOT ? 'var(--accent-muted)' : 'transparent'}; border-color:${isOT ? 'var(--accent)' : 'var(--border)'}">${isOT ? 'OT PERMIT' : 'REGULAR'}</span></td>
+            <td style="padding-right:24px; color:var(--success); font-weight:700;">VERIFIED</td>
+        `;
+        tableBody.appendChild(tr);
+    });
+
+    // Handle Print
+    document.getElementById('print-report-btn').onclick = () => window.print();
 }
 
 function updateInventoryUI(category) {
