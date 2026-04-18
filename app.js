@@ -43,10 +43,9 @@ const adminPassInput = document.getElementById('admin-pass-input');
 const adminPassBtn = document.getElementById('admin-pass-btn');
 
 // Analytics Elements
-const statTotalBookings = document.getElementById('stat-total-bookings');
-const statPeakItem = document.getElementById('stat-peak-item');
-const statUtilPercent = document.getElementById('stat-util-percent');
-const statUtilBar = document.getElementById('stat-util-bar');
+const statResourceGrid = document.getElementById('stat-resource-grid');
+const statTotalHours = document.getElementById('stat-total-hours');
+const statGlobalUtil = document.getElementById('stat-global-util');
 
 const equipmentChips = document.querySelectorAll('.chip');
 
@@ -128,35 +127,90 @@ function handleOTCheck() {
  * Updates the Usage Analytics Card based on current bookings state.
  */
 function updateAnalytics() {
-    if (!statTotalBookings) return;
+    if (!statResourceGrid) return;
     
-    let total = 0;
-    const equipCounts = {};
+    let globalTotalHours = 0;
+    const standardLabHours = 9; 
+    
+    // Core Pinned Resources (Always visible)
+    const resourceData = {
+        'Confocal Microscope': { count: 0, hours: 0, lastUser: 'Available', isPinned: true },
+        'Centrifuge': { count: 0, hours: 0, lastUser: 'Available', isPinned: true },
+        'PCR Thermal Cycler': { count: 0, hours: 0, lastUser: 'Available', isPinned: true },
+        'Laboratory Autoclave': { count: 0, hours: 0, lastUser: 'Available', isPinned: true }
+    };
     
     Object.values(state.bookings).forEach(dayList => {
-        total += dayList.length;
         dayList.forEach(b => {
-            equipCounts[b.equipment] = (equipCounts[b.equipment] || 0) + 1;
+            const duration = Math.max(0, b.outFloat - b.inFloat);
+            globalTotalHours += duration;
+            
+            if (!resourceData[b.equipment]) {
+                resourceData[b.equipment] = { count: 0, hours: 0, lastUser: '', isPinned: false };
+            }
+            resourceData[b.equipment].count++;
+            resourceData[b.equipment].hours += duration;
+            resourceData[b.equipment].lastUser = b.studentName;
         });
     });
 
-    statTotalBookings.textContent = total;
+    // Populate Resource Grid
+    statResourceGrid.innerHTML = '';
+    
+    // Sort: Pinned first, then by usage hours
+    const sortedResources = Object.entries(resourceData).sort((a,b) => {
+        if (a[1].isPinned && !b[1].isPinned) return -1;
+        if (!a[1].isPinned && b[1].isPinned) return 1;
+        return b[1].hours - a[1].hours;
+    });
 
-    // Peak Equipment
-    let peak = "N/A";
-    let max = 0;
-    for (const [name, count] of Object.entries(equipCounts)) {
-        if (count > max) {
-            max = count;
-            peak = name;
-        }
+    sortedResources.forEach(([name, data]) => {
+        const intensity = Math.min(Math.round((data.hours / standardLabHours) * 100), 100);
+        let statusColor = 'var(--success)';
+        if (intensity > 40) statusColor = 'var(--warning)';
+        if (intensity > 80) statusColor = 'var(--danger)';
+
+        const card = document.createElement('div');
+        card.style.cssText = `
+            background: var(--bg-surface-elevated); border: 1px solid var(--border);
+            padding: 16px; border-radius: 8px; display:flex; flex-direction:column; gap:12px;
+            border-top: 3px solid ${data.isPinned && data.count === 0 ? 'var(--text-muted)' : statusColor};
+            opacity: ${data.isPinned && data.count === 0 ? '0.7' : '1'};
+        `;
+        card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+                <div>
+                    <div style="font-size:14px; font-weight:700; color:var(--text-primary);">${name}</div>
+                    <div style="font-size:10px; color:var(--text-muted);">${data.isPinned ? 'CORE EQUIPMENT' : 'AD-HOC RESOURCE'}</div>
+                </div>
+                <div style="padding:4px 8px; background:var(--bg-main); border-radius:4px; font-size:10px; font-weight:800; color:${data.count === 0 ? 'var(--text-muted)' : statusColor}; border:1px solid ${data.count === 0 ? 'var(--border)' : statusColor + '33'};">
+                    ${data.count === 0 ? 'STANDBY' : intensity + '% LOAD'}
+                </div>
+            </div>
+            <div style="flex:1;">
+                <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                    <span style="color:var(--text-secondary);">Total Utilization</span>
+                    <span style="color:var(--text-primary); font-weight:700;">${data.hours.toFixed(1)}h</span>
+                </div>
+                <div style="height:6px; background:var(--bg-main); border-radius:3px; overflow:hidden;">
+                    <div style="height:100%; width:${intensity}%; background:${statusColor}; box-shadow:0 0 10px ${statusColor}44;"></div>
+                </div>
+            </div>
+            <div style="font-size:10px; color:var(--text-muted); border-top:1px solid var(--border); padding-top:8px;">
+                Status: <span style="color:var(--text-secondary); font-weight:600;">${data.lastUser}</span>
+            </div>
+        `;
+        statResourceGrid.appendChild(card);
+    });
+
+    // Global Stats
+    if (statTotalHours) statTotalHours.textContent = `${globalTotalHours.toFixed(1)}h`;
+    
+    const globalLoad = Math.min(Math.round((globalTotalHours / (9 * 5)) * 100), 100);
+    if (statGlobalUtil) {
+        statGlobalUtil.textContent = `${globalLoad}%`;
+        statGlobalUtil.style.color = globalLoad > 80 ? 'var(--danger)' : (globalLoad > 40 ? 'var(--warning)' : 'var(--success)');
     }
-    statPeakItem.textContent = peak;
-
-    // Simulated Utilization (assume 50 total slots per month is '100%')
-    const utilVal = Math.min(Math.round((total / 50) * 100), 100);
-    statUtilPercent.textContent = `${utilVal}%`;
-    statUtilBar.style.width = `${utilVal}%`;
 }
 
 function renderCalendar() {

@@ -67,7 +67,7 @@
 
             <div class="bento-grid">
                 <!-- Module 1: Student Reservation Module -->
-                <section class="bento-card scheduling-module">
+                <section class="bento-card scheduling-module" style="grid-column: span 6;">
                     <div class="card-label">
                         <svg width="14" height="14" fill="var(--accent)" viewBox="0 0 24 24"><path d="M19 19H5V8h14v11zM16 1h-8v2h8V1zM9 22h6v2H9v-2zm10-18h-3V1h-2v3h-4V1H8v3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
                         Student Reservation Module
@@ -155,7 +155,7 @@
                 </section>
 
                 <!-- Module 2: Actionable Calendar Grid -->
-                <section class="bento-card calendar-module" style="grid-column: span 7; display: flex; flex-direction: column; position: relative;">
+                <section class="bento-card calendar-module" style="grid-column: span 6; display: flex; flex-direction: column; position: relative;">
                     <div class="card-label">
                         <svg fill="currentColor" viewBox="0 0 24 24" width="14" height="14" style="color:var(--accent)"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
                         Actionable Calendar Grid
@@ -196,33 +196,34 @@
                     </div>
                 </section>
 
-                <!-- Module 3: Usage Analytics -->
-                <section class="bento-card analytics-module" style="grid-column: span 5; display:flex; flex-direction:column; gap:16px;">
+                <!-- Module 3: Laboratory Resource Monitoring -->
+                <section class="bento-card analytics-module" style="grid-column: span 12; display:flex; flex-direction:column; gap:20px;">
                     <div class="card-label">
                         <svg width="14" height="14" fill="var(--accent)" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                        Laboratory Usage Analytics
+                        Individual Resource Monitoring & Usage Intensity
                     </div>
                     
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                        <div style="padding:16px; background:var(--bg-surface-elevated); border-radius:8px; border:1px solid var(--border);">
-                            <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:4px;">Total Reservations</div>
-                            <div class="mono" id="stat-total-bookings" style="font-size:24px; color:var(--accent); font-weight:800;">0</div>
-                        </div>
-                        <div style="padding:16px; background:var(--bg-surface-elevated); border-radius:8px; border:1px solid var(--border);">
-                            <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:4px;">Peak Resource</div>
-                            <div id="stat-peak-item" style="font-size:12px; color:var(--text-primary); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">N/A</div>
+                    <div id="stat-resource-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+                        <!-- JS will populate detailed equipment cards here -->
+                        <div style="grid-column: 1/-1; padding:32px; text-align:center; color:var(--text-muted); background:var(--bg-surface-elevated); border-radius:8px; border:1px dashed var(--border);">
+                            No resources currently active in the logs.
                         </div>
                     </div>
 
-                    <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-                        <div style="font-size:11px; font-weight:700; color:var(--text-secondary); display:flex; justify-content:space-between;">
-                            <span>Recent Load Utilization</span>
-                            <span id="stat-util-percent" style="color:var(--accent)">0%</span>
+                    <div style="border-top: 1px solid var(--border); padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-size:12px; color:var(--text-secondary);">
+                            <span style="color:var(--accent); font-weight:700;">System Metric:</span> Utilization is calculated relative to available lab hours (08:00 AM - 05:00 PM).
                         </div>
-                        <div style="height:8px; background:var(--bg-surface-elevated); border-radius:4px; overflow:hidden;">
-                            <div id="stat-util-bar" style="height:100%; width:0%; background:linear-gradient(90deg, var(--accent), #00a3ff); box-shadow:0 0 10px var(--accent-glow); transition: width 0.5s ease-out;"></div>
+                        <div style="display:flex; gap:24px;">
+                            <div style="text-align:right;">
+                                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Total Lab Hours</div>
+                                <div class="mono" id="stat-total-hours" style="font-size:18px; color:var(--text-primary); font-weight:700;">0h</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Global Load</div>
+                                <div class="mono" id="stat-global-util" style="font-size:18px; color:var(--success); font-weight:700;">0%</div>
+                            </div>
                         </div>
-                        <div style="font-size:10px; color:var(--text-muted);">Calculated based on 30-day historical data logs.</div>
                     </div>
                 </section>
             </div>
