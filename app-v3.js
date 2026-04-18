@@ -742,7 +742,6 @@ function updateReportsUI() {
             <td style="font-weight:600;">${name}</td>
             <td>${b.equipment}</td>
             <td class="mono">${tIn} - ${tOut}</td>
-            <td><span class="chip" style="background:${isOT ? 'var(--accent-muted)' : 'transparent'}; border-color:${isOT ? 'var(--accent)' : 'var(--border)'}">${isOT ? 'OT PERMIT' : 'REGULAR'}</span></td>
             <td style="padding-right:24px; color:var(--success); font-weight:700;">VERIFIED</td>
         `;
         tableBody.appendChild(tr);
