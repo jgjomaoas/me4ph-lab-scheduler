@@ -206,7 +206,7 @@ function updateAnalytics() {
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted);">
                     <span>${data.hours.toFixed(1)}h logged</span>
-                    <span>${data.lastUser}</span>
+                    <span>User: ${data.lastUser}</span>
                 </div>
             `;
             statResourceGrid.appendChild(card);
